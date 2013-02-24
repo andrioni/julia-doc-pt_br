@@ -1,3 +1,42 @@
+README da Documentação de Julia
+===============================
+
+A documentação de Julia está escrita em reStructuredText, e uma boa referência 
+é o capítulo [Documenting Python](http://docs.python.org/devguide/documenting.html)
+do Python Developer's Guide.
+
+Compilando a documentação
+-------------------------
+
+A documentação é compilada usando o [Sphinx](http://sphinx.pocoo.org/) e LaTeX.
+No Ubuntu, você precisa ter os seguintes pacotes instalados:
+
+    python-sphinx
+    texlive
+    texlive-latex-extra
+
+E então rodar
+
+    $ make helpdb.jl
+    $ make html
+    $ make latexpdf
+
+Estrutura dos arquivos
+----------------------
+
+    conf.py             Configuração do Sphinx
+    helpdb.jl           REPL help database
+    sphinx/             Extensões e plugins do Sphinx
+    sphinx/jlhelp.py    Plugin Sphinx para compilar helpdb.jl
+    stdlib/             Documentação da biblioteca padrão de Julia
+    _themes/            Temas html do Sphinx
+
+README da tradução brasileira
+=============================
+
+A documentação de Julia é grande, e a tradução acaba de começar. Sendo assim,
+seria bom definir uma lista de traduções para termos comuns.
+
 Julia Documentation README
 ==========================
 
