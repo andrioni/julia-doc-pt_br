@@ -17,7 +17,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 JQUERYDEST = _themes/julia/static/jquery.js
 JQUERYURL = http://code.jquery.com/jquery-latest.js
-WGET = $(abspath ../deps)/jldownload
+WGET = $(abspath deps)/jldownload
 
 .PHONY: help clean clean-jquery cleanall get-jquery html dirhtml singlehtml pickle json htmlhelp qthelp devhelp \
 	epub latex latexpdf text man changes linkcheck doctest gettext listpkg
