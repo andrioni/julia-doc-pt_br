@@ -1,2 +1,3 @@
 _build/
 _themes/julia/static/jquery.js
+.DS_Store
