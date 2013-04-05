@@ -12,7 +12,7 @@ Getting Around
    Print information about global variables in a module, optionally restricted
    to those matching ``pattern``.
 
-.. function:: edit("file", [line])
+.. function:: edit(file::String, [line])
 
    Edit a file optionally providing a line number to edit at. Returns to the julia prompt when you quit the editor. If the file name ends in ".jl" it is reloaded when the editor closes the file.
 
@@ -20,25 +20,47 @@ Getting Around
 
    Edit the definition of a function, optionally specifying a tuple of types to indicate which method to edit. When the editor exits, the source file containing the definition is reloaded.
 
-.. function:: require("file")
+.. function:: require(file::String...)
 
-   Evaluate the contents of a source file
+   Load source files once, in the context of the ``Main`` module, on every active node, searching the system-wide ``LOAD_PATH`` for files. ``require`` is considered a top-level operation, so it sets the current ``include`` path but does not use it to search for files (see help for ``include``). This function is typically used to load library code, and is implicitly called by ``using`` to load packages.
 
-.. function:: help("name" or object)
+.. function:: reload(file::String)
 
-   Get help for a function
+   Like ``require``, except forces loading of files regardless of whether they have been loaded before. Typically used when interactively developing libraries.
 
-.. function:: apropos("string")
+.. function:: include(path::String)
 
-   Search help for a substring
+   Evaluate the contents of a source file in the current context. During including, a task-local include path is set to the directory containing the file. Nested calls to ``include`` will search relative to that path. All paths refer to files on node 1 when running in parallel, and files will be fetched from node 1. This function is typically used to load source interactively, or to combine files in packages that are broken into multiple source files.
+
+.. function:: include_string(code::String)
+
+   Like ``include``, except reads code from the given string rather than from a file. Since there is no file path involved, no path processing or fetching from node 1 is done.
+
+.. function:: evalfile(path::String)
+
+   Evaluate all expressions in the given file, and return the value of the last one. No other processing (path searching, fetching from node 1, etc.) is performed.
+
+.. function:: help(name)
+
+   Get help for a function. ``name`` can be an object or a string.
+
+.. function:: apropos(string)
+
+   Search documentation for functions related to ``string``.
 
 .. function:: which(f, args...)
 
-   Show which method of ``f`` will be called for the given arguments
+   Show which method of ``f`` will be called for the given arguments.
 
 .. function:: methods(f)
 
-   Show all methods of ``f`` with their argument types
+   Show all methods of ``f`` with their argument types.
+
+.. function:: methodswith(typ[, showparents])
+
+   Show all methods with an argument of type ``typ``. If optional
+   ``showparents`` is ``true``, also show arguments with a parent type
+   of ``typ``, excluding type ``Any``.  
 
 All Objects
 -----------
@@ -110,6 +132,10 @@ Types
 
    True if and only if all values of ``type1`` are also of ``type2``. Can also be written using the ``<:`` infix operator as ``type1 <: type2``.
 
+.. function:: <:(T1, T2)
+
+   Subtype operator, equivalent to ``subtype(T1,T2)``.
+
 .. function:: typemin(type)
 
    The lowest value representable by the given (real) numeric type.
@@ -146,12 +172,29 @@ Types
 
    Determine a type big enough to hold values of each argument type without loss, whenever possible. In some cases, where no type exists which to which both types can be promoted losslessly, some loss is tolerated; for example, ``promote_type(Int64,Float64)`` returns ``Float64`` even though strictly, not all ``Int64`` values can be represented exactly as ``Float64`` values.
 
+.. function:: getfield(value, name::Symbol)
+
+   Extract a named field from a value of composite type. The syntax ``a.b`` calls
+   ``getfield(a, :b)``, and the syntax ``a.(b)`` calls ``getfield(a, b)``.
+
+.. function:: setfield(value, name::Symbol, x)
+
+   Assign ``x`` to a named field in ``value`` of composite type.
+   The syntax ``a.b = c`` calls ``setfield(a, :b, c)``, and the syntax ``a.(b) = c``
+   calls ``setfield(a, b, c)``.
+
+.. function:: fieldtype(value, name::Symbol)
+
+   Determine the declared type of a named field in a value of composite type.
+
 Generic Functions
 -----------------
 
-.. function:: method_exists(f, tuple)
+.. function:: method_exists(f, tuple) -> Bool
 
    Determine whether the given generic function has a method matching the given tuple of argument types.
+
+   **Example**: ``method_exists(length, (Array,)) = true``
 
 .. function:: applicable(f, args...)
 
@@ -161,7 +204,7 @@ Generic Functions
 
    Invoke a method for the given generic function matching the specified types (as a tuple), on the specified arguments. The arguments must be compatible with the specified types. This allows invoking a method other than the most specific matching method, which is useful when the behavior of a more general definition is explicitly needed (often as part of the implementation of a more specific method of the same function).
 
-.. function:: |
+.. function:: |(x, f)
    
    Applies a function to the preceding argument which allows for easy function chaining.
 
@@ -187,11 +230,11 @@ is translated to::
 
 The ``state`` object may be anything, and should be chosen appropriately for each iterable type.
 
-.. function:: start(iter)
+.. function:: start(iter) -> state
 
    Get initial iteration state for an iterable object
 
-.. function:: done(iter, state)
+.. function:: done(iter, state) -> Bool
 
    Test whether we are done iterating
 
@@ -201,23 +244,31 @@ The ``state`` object may be anything, and should be chosen appropriately for eac
 
 .. function:: zip(iters...)
 
-   For a set of iterable objects, returns an iterable of tuples, where the ``i``th tuple contains the ``i``th component of each input iterable.
+   For a set of iterable objects, returns an iterable of tuples, where the ``i``\ th tuple contains the ``i``\ th component of each input iterable.
 
-   Note that ``zip`` is it's own inverse: [zip(zip(a...)...)...] == [a...]
+   Note that ``zip`` is it's own inverse: ``[zip(zip(a...)...)...] == [a...]``.
 
+.. function:: enumerate(iter)
+
+   Return an iterator that yields ``(i, x)`` where ``i`` is an index starting at 1,
+   and ``x`` is the ``ith`` value from the given iterator.
 
 Fully implemented by: ``Range``, ``Range1``, ``NDRange``, ``Tuple``, ``Real``, ``AbstractArray``, ``IntSet``, ``ObjectIdDict``, ``Dict``, ``WeakKeyDict``, ``EachLine``, ``String``, ``Set``, ``Task``.
 
 General Collections
 -------------------
 
-.. function:: isempty(collection)
+.. function:: isempty(collection) -> Bool
 
    Determine whether a collection is empty (has no elements).
 
-.. function:: length(collection)
+.. function:: empty!(collection) -> collection
 
-   For ordered, indexable collections, the maximum index ``i`` for which ``ref(collection, i)`` is valid. For unordered collections, the number of elements.
+   Remove all elements from a collection.
+
+.. function:: length(collection) -> Integer
+
+   For ordered, indexable collections, the maximum index ``i`` for which ``getindex(collection, i)`` is valid. For unordered collections, the number of elements.
 
 .. function:: endof(collection) -> Integer
 
@@ -230,7 +281,7 @@ Fully implemented by: ``Range``, ``Range1``, ``Tuple``, ``Number``, ``AbstractAr
 Iterable Collections
 --------------------
 
-.. function:: contains(itr, x)
+.. function:: contains(itr, x) -> Bool
 
    Determine whether a collection contains the given value, ``x``.
 
@@ -248,55 +299,65 @@ Iterable Collections
 
 .. function:: max(itr)
 
-   Determine maximum element in a collection
+   Returns the largest element in a collection
 
 .. function:: min(itr)
 
-   Determine minimum element in a collection
+   Returns the smallest element in a collection
 
-.. function:: indmax(itr)
+.. function:: indmax(itr) -> Integer
 
    Returns the index of the maximum element in a collection
 
-.. function:: indmin(itr)
+.. function:: indmin(itr) -> Integer
 
    Returns the index of the minimum element in a collection
 
-.. function:: findmax(iter)
+.. function:: findmax(itr) -> (x, index)
 
-   Returns a tuple of the maximum element and its index
+   Returns the maximum element and its index
 
-.. function:: findmin(iter)
+.. function:: findmin(itr) -> (x, index)
 
-   Returns a tuple of the minimum element and its index
+   Returns the minimum element and its index
 
 .. function:: sum(itr)
 
-   Sum elements of a collection
+   Returns the sum of all elements in a collection
 
 .. function:: prod(itr)
 
-   Multiply elements of a collection
+   Returns the product of all elements of a collection
 
-.. function:: any(itr)
+.. function:: any(itr) -> Bool
 
    Test whether any elements of a boolean collection are true
 
-.. function:: all(itr)
+.. function:: all(itr) -> Bool
 
    Test whether all elements of a boolean collection are true
 
-.. function:: any(p, itr)
+.. function:: count(itr) -> Integer
+
+   Count the number of boolean elements in ``itr`` which are true.
+
+.. function:: countp(p, itr) -> Integer
+
+   Count the number of elements in ``itr`` for which predicate ``p`` is true.
+
+.. function:: any(p, itr) -> Bool
 
    Determine whether any element of ``itr`` satisfies the given predicate.
 
-.. function:: all(p, itr)
+.. function:: all(p, itr) -> Bool
 
    Determine whether all elements of ``itr`` satisfy the given predicate.
 
-.. function:: map(f, c)
+.. function:: map(f, c) -> collection
 
    Transform collection ``c`` by applying ``f`` to each element.
+
+   **Example**: ``map((x) -> x * 2, [1, 2, 3]) = [2, 4, 6]``
 
 .. function:: map!(function, collection)
 
@@ -308,18 +369,28 @@ Iterable Collections
 
    **Example**: ``mapreduce(x->x^2, +, [1:3]) == 1 + 4 + 9 == 14``
 
+.. function:: first(coll)
+
+   Get the first element of an ordered collection.
+
+.. function:: last(coll)
+
+   Get the last element of an ordered collection.
+
 Indexable Collections
 ---------------------
 
-.. function:: ref(collection, key...)
-              collection[key...]
+.. function:: getindex(collection, key...)
 
    Retrieve the value(s) stored at the given key or index within a collection.
+   The syntax ``a[i,j,...]`` is converted by the compiler to
+   ``getindex(a, i, j, ...)``.
 
-.. function:: assign(collection, value, key...)
-              collection[key...] = value
+.. function:: setindex!(collection, value, key...)
 
    Store the given value at the given key or index within a collection.
+   The syntax ``a[i,j,...] = x`` is converted by the compiler to
+   ``setindex!(a, x, i, j, ...)``.
 
 Fully implemented by: ``Array``, ``DArray``, ``AbstractArray``, ``SubArray``, ``ObjectIdDict``, ``Dict``, ``WeakKeyDict``, ``String``.
 
@@ -356,10 +427,6 @@ As with arrays, ``Dicts`` may be created with comprehensions. For example,
 .. function:: delete!(collection, key)
 
    Delete the mapping for the given key in a collection.
-
-.. function:: empty!(collection)
-
-   Delete all keys from a collection.
 
 .. function:: keys(collection)
 
@@ -475,39 +542,39 @@ Partially implemented by: ``Array``.
 Dequeues
 --------
 
-.. function:: push!(collection, item)
+.. function:: push!(collection, item) -> collection
 
    Insert an item at the end of a collection.
 
-.. function:: pop!(collection)
+.. function:: pop!(collection) -> item
 
    Remove the last item in a collection and return it.
 
-.. function:: unshift!(collection, item)
+.. function:: unshift!(collection, item) -> collection
 
    Insert an item at the beginning of a collection.
 
-.. function:: shift!(collection)
+.. function:: shift!(collection) -> item
 
-   Remove the first item in a collection and return it.
+   Remove the first item in a collection.
 
 .. function:: insert!(collection, index, item)
 
    Insert an item at the given index.
 
-.. function:: delete!(collection, index)
+.. function:: delete!(collection, index) -> item
 
-   Remove the item at the given index.
+   Remove the item at the given index, and return the deleted item.
 
-.. function:: delete!(collection{Type}, range) -> items{Type}
+.. function:: delete!(collection, range) -> items
    
-   Remove items at specified range.
+   Remove items at specified range, and return a collection containing the deleted items.
 
 .. function:: resize!(collection, n) -> collection
 
    Resize collection to contain ``n`` elements.
 
-.. function:: append!(collection, items)
+.. function:: append!(collection, items) -> collection
 
    Add the elements of ``items`` to the end of a collection.
 
@@ -520,27 +587,21 @@ Strings
 
    The number of characters in string ``s``.
 
-.. function:: collect(string)
-
-   Return an array of the characters in ``string``.
-
-.. function:: *, string(strs...)
+.. function:: *(s, t)
 
    Concatenate strings.
 
-.. function:: ^
+   **Example**: ``"Hello " * "world" == "Hello world"``
 
-   Repeat a string.
+.. function:: ^(s, n)
+
+   Repeat string ``s`` ``n`` times.
 
    **Example**: ``"Julia "^3 == "Julia Julia Julia "``
 
-.. function:: string(char...)
+.. function:: string(xs...)
 
-   Create a string with the given characters.
-
-.. function:: string(x)
-
-   Create a string from any value using the ``print`` function.
+   Create a string from any values using the ``print`` function.
 
 .. function:: repr(x)
 
@@ -548,7 +609,7 @@ Strings
 
 .. function:: bytestring(::Ptr{Uint8})
 
-   Create a string from the address of a C (0-terminated) string.
+   Create a string from the address of a C (0-terminated) string. A copy is made; the ptr can be safely freed.
 
 .. function:: bytestring(s)
 
@@ -572,27 +633,19 @@ Strings
 
 .. function:: is_valid_ascii(s) -> Bool
 
-   Returns true if the string is valid ASCII, false otherwise.
+   Returns true if the string or byte vector is valid ASCII, false otherwise.
 
 .. function:: is_valid_utf8(s) -> Bool
 
-   Returns true if the string is valid UTF-8, false otherwise.
+   Returns true if the string or byte vector is valid UTF-8, false otherwise.
 
-.. function:: check_ascii(s)
+.. function:: is_valid_char(c) -> Bool
 
-   Calls :func:`is_valid_ascii` on string. Throws error if it is not valid.
+   Returns true if the given char or integer is a valid Unicode code point.
 
-.. function:: check_utf8(s)
+.. function:: ismatch(r::Regex, s::String)
 
-   Calls :func:`is_valid_utf8` on string. Throws error if it is not valid.
-
-.. function:: byte_string_classify(s)
-
-   Returns 0 if the string is neither valid ASCII nor UTF-8, 1 if it is valid ASCII, and 2 if it is valid UTF-8.
-
-.. function:: search(string, char, [i])
-
-   Return the index of ``char`` in ``string``, giving 0 if not found. The second argument may also be a vector or a set of characters. The third argument optionally specifies a starting index.
+   Test whether a string contains a match of the given regular expression.
 
 .. function:: lpad(string, n, p)
 
@@ -604,37 +657,33 @@ Strings
 
 .. function:: search(string, chars, [start])
 
-   Search for the given characters within the given string. The second argument may be a single character, a vector or a set of characters, a string, or a regular expression (but regular expressions are only allowed on contiguous strings, such as ASCII or UTF-8 strings). The third argument optionally specifies a starting index. The return value is a range of indexes where the matching sequence is found, such that ``s[search(s,x)] == x``. The return value is ``0:-1`` if there is no match.
+   Search for the given characters within the given string. The second argument may be a single character, a vector or a set of characters, a string, or a regular expression (though regular expressions are only allowed on contiguous strings, such as ASCII or UTF-8 strings). The third argument optionally specifies a starting index. The return value is a range of indexes where the matching sequence is found, such that ``s[search(s,x)] == x``. The return value is ``0:-1`` if there is no match.
 
 .. function:: replace(string, pat, r[, n])
 
-   Search for the given pattern ``pat``, and replace each occurance with ``r``. If ``n`` is provided, replace at most ``n`` occurances.  As with search, the second argument may be a single character, a vector or a set of characters, a string, or a regular expression.
-
-.. function:: replace(string, pat, f[, n])
-
-   Search for the given pattern ``pat``, and replace each occurance with ``f(pat)``. If ``n`` is provided, replace at most ``n`` occurances.  As with search, the second argument may be a single character, a vector or a set of characters, a string, or a regular expression.
+   Search for the given pattern ``pat``, and replace each occurance with ``r``. If ``n`` is provided, replace at most ``n`` occurances.  As with search, the second argument may be a single character, a vector or a set of characters, a string, or a regular expression. If ``r`` is a function, each occurrence is replaced with ``r(s)`` where ``s`` is the matched substring.
 
 .. function:: split(string, [chars, [limit,] [include_empty]])
 
    Return an array of strings by splitting the given string on occurrences of the given character delimiters, which may be specified in any of the formats allowed by ``search``'s second argument (i.e. a single character, collection of characters, string, or regular expression). If ``chars`` is omitted, it defaults to the set of all space characters, and ``include_empty`` is taken to be false. The last two arguments are also optional: they are are a maximum size for the result and a flag determining whether empty fields should be included in the result.
 
-.. function:: strip(string)
+.. function:: strip(string, [chars])
 
-   Return ``string`` with any leading and trailing whitespace removed.
+   Return ``string`` with any leading and trailing whitespace removed. If a string ``chars`` is provided, instead remove characters contained in that string.
 
-.. function:: lstrip(string)
+.. function:: lstrip(string, [chars])
 
-   Return ``string`` with any leading whitespace removed.
+   Return ``string`` with any leading whitespace removed. If a string ``chars`` is provided, instead remove characters contained in that string.
 
-.. function:: rstrip(string)
+.. function:: rstrip(string, [chars])
 
-   Return ``string`` with any trailing whitespace removed.
+   Return ``string`` with any trailing whitespace removed. If a string ``chars`` is provided, instead remove characters contained in that string.
 
-.. function:: begins_with(string, prefix)
+.. function:: beginswith(string, prefix)
 
    Returns ``true`` if ``string`` starts with ``prefix``.
 
-.. function:: ends_with(string, suffix)
+.. function:: endswith(string, suffix)
 
    Returns ``true`` if ``string`` ends with ``suffix``.
 
@@ -696,6 +745,58 @@ Strings
 
    Gives the number of columns needed to print a string.
 
+.. function:: isalnum(c::Char)
+
+   Tests whether a character is alphanumeric.
+
+.. function:: isalpha(c::Char)
+
+   Tests whether a character is alphabetic.
+
+.. function:: isascii(c::Char)
+
+   Tests whether a character belongs to the ASCII character set.
+
+.. function:: isblank(c::Char)
+
+   Tests whether a character is a tab or space.
+
+.. function:: iscntrl(c::Char)
+
+   Tests whether a character is a control character.
+
+.. function:: isdigit(c::Char)
+
+   Tests whether a character is a numeric digit (0-9).
+
+.. function:: isgraph(c::Char)
+
+   Tests whether a character is printable, and not a space.
+
+.. function:: islower(c::Char)
+
+   Tests whether a character is a lowercase letter.
+
+.. function:: isprint(c::Char)
+
+   Tests whether a character is printable, including space.
+
+.. function:: ispunct(c::Char)
+
+   Tests whether a character is printable, and not a space or alphanumeric.
+
+.. function:: isspace(c::Char)
+
+   Tests whether a character is any whitespace character.
+
+.. function:: isupper(c::Char)
+
+   Tests whether a character is an uppercase letter.
+
+.. function:: isxdigit(c::Char)
+
+   Tests whether a character is a valid hexadecimal digit.
+
 I/O
 ---
 
@@ -711,11 +812,15 @@ I/O
 
    Global variable referring to the standard input stream.
 
-.. function:: open(file_name, [read, write, create, truncate, append])
+.. data:: OUTPUT_STREAM
+
+   The default stream used for text output, e.g. in the ``print`` and ``show`` functions.
+
+.. function:: open(file_name, [read, write, create, truncate, append]) -> IOStream
 
    Open a file in a mode specified by five boolean arguments. The default is to open files for reading only. Returns a stream for accessing the file.
 
-.. function:: open(file_name, [mode])
+.. function:: open(file_name, [mode]) -> IOStream
 
    Alternate syntax for open, where a string-based mode specifier is used instead of the five booleans. The values of ``mode`` correspond to those from ``fopen(3)`` or Perl ``open``, and are equivalent to setting the following boolean groups:
 
@@ -728,19 +833,20 @@ I/O
     a+   read, write, create, append
    ==== =================================
 
+
 .. function:: open(f::function, args...)
 
    Apply the function ``f`` to the result of ``open(args...)`` and close the resulting file descriptor upon completion.
 
    **Example**: ``open(readall, "file.txt")``
 
-.. function:: IOBuffer([size])
+.. function:: memio([size[, finalize::Bool]]) -> IOStream
 
    Create an in-memory I/O stream, optionally specifying how much initial space is needed.
 
-.. function:: fdio(descriptor, [own])
+.. function:: fdio([name::String, ]fd::Integer[, own::Bool]) -> IOStream
 
-   Create an ``IOStream`` object from an integer file descriptor. If ``own`` is true, closing this object will close the underlying descriptor. By default, an ``IOStream`` is closed when it is garbage collected.
+   Create an ``IOStream`` object from an integer file descriptor. If ``own`` is true, closing this object will close the underlying descriptor. By default, an ``IOStream`` is closed when it is garbage collected. ``name`` allows you to associate the descriptor with a named file.
 
 .. function:: flush(stream)
 
@@ -795,7 +901,15 @@ Text I/O
 
 .. function:: println(x)
 
-   Print (using ``print``) ``x`` followed by a newline
+   Print (using :func:`print`) ``x`` followed by a newline
+
+.. function:: @printf([io::IOStream], "%Fmt", args...)
+
+   Print arg(s) using C ``printf()`` style format specification string. Optionally, an IOStream may be passed as the first argument to redirect output.
+
+.. function:: @sprintf("%Fmt", args...)
+    
+   Return ``@printf`` formatted output as string.
 
 .. function:: showall(x)
 
@@ -821,7 +935,7 @@ Text I/O
 
    Read all lines as an array.
 
-.. function:: each_line(stream)
+.. function:: eachline(stream)
 
    Create an iterable object that will yield each line from a stream.
 
@@ -856,7 +970,7 @@ Memory-mapped I/O
 
    The file is specified via the stream.  When you initialize the stream, use "r" for a "read-only" array, and "w+" to create a new array used to write values to disk. Optionally, you can specify an offset (in bytes) if, for example, you want to skip over a header in the file.
 
-   Example:  A = mmap_array(Int64, (25,30000), s)
+   **Example**:  A = mmap_array(Int64, (25,30000), s)
 
    This would create a 25-by-30000 array of Int64s, linked to the file associated with stream s.
 
@@ -880,17 +994,57 @@ Standard Numeric Types
 Mathematical Functions
 ----------------------
 
-.. function:: -
+.. function:: -(x)
 
-   Unary minus
+   Unary minus operator.
 
-.. function:: + - * / \\ ^
+.. function:: +(x, y)
 
-   The binary addition, subtraction, multiplication, left division, right division, and exponentiation operators
+   Binary addition operator.
 
-.. function:: .* ./ .\\ .^
+.. function:: -(x, y)
 
-   The element-wise binary addition, subtraction, multiplication, left division, right division, and exponentiation operators
+   Binary subtraction operator.
+
+.. function:: *(x, y)
+
+   Binary multiplication operator.
+
+.. function:: /(x, y)
+
+   Binary left-division operator.
+
+.. function:: \\(x, y)
+
+   Binary right-division operator.
+
+.. function:: ^(x, y)
+
+   Binary exponentiation operator.
+
+.. function:: .+(x, y)
+
+   Element-wise binary addition operator.
+
+.. function:: .-(x, y)
+
+   Element-wise binary subtraction operator.
+
+.. function:: .*(x, y)
+
+   Element-wise binary multiplication operator.
+
+.. function:: ./(x, y)
+
+   Element-wise binary left division operator.
+
+.. function:: .\\(x, y)
+
+   Element-wise binary right division operator.
+
+.. function:: .^(x, y)
+
+   Element-wise binary exponentiation operator.
 
 .. function:: div(a,b)
 
@@ -904,19 +1058,19 @@ Mathematical Functions
 
    Modulus after division, returning in the range [0,m)
 
-.. function:: rem
+.. function:: rem(x, m)
 
    Remainder after division
 
-.. function:: %
+.. function:: %(x, m)
 
-   Remainder after division
+   Remainder after division. The operator form of ``rem``.
 
 .. function:: mod1(x,m)
 
    Modulus after division, returning in the range (0,m]
 
-.. function:: //
+.. function:: //(num, den)
 
    Rational division
 
@@ -928,35 +1082,98 @@ Mathematical Functions
 
    Denominator of the rational representation of ``x``
 
-.. function:: << >>
+.. function:: <<(x, n)
 
-   Left and right shift operators
+   Left shift operator.
 
-.. function:: == != < <= > >=
+.. function:: >>(x, n)
 
-   Comparison operators to test equals, not equals, less than, less than or equals, greater than, and greater than or equals
+   Right shift operator.
+
+.. function:: >>>(x, n)
+
+   Unsigned right shift operator.
+
+.. function:: :(start, [step], stop)
+
+   Range operator. ``a:b`` constructs a range from ``a`` to ``b`` with a step size of 1,
+   and ``a:s:b`` is similar but uses a step size of ``s``. These syntaxes call the
+   function ``colon``.
+   The colon is also used in indexing to select whole dimensions.
+
+.. function:: colon(start, [step], stop)
+
+   Called by ``:`` syntax for constructing ranges.
+
+.. function:: ==(x, y)
+
+   Equality comparison operator.
+
+.. function:: !=(x, y)
+
+   Not-equals comparison operator.
+
+.. function:: <(x, y)
+
+   Less-than comparison operator.
+
+.. function:: <=(x, y)
+
+   Less-than-or-equals comparison operator.
+
+.. function:: >(x, y)
+
+   Greater-than comparison operator.
+
+.. function:: >=(x, y)
+
+   Greater-than-or-equals comparison operator.
+
+.. function:: .==(x, y)
+
+   Element-wise equality comparison operator.
+
+.. function:: .!=(x, y)
+
+   Element-wise not-equals comparison operator.
+
+.. function:: .<(x, y)
+
+   Element-wise less-than comparison operator.
+
+.. function:: .<=(x, y)
+
+   Element-wise less-than-or-equals comparison operator.
+
+.. function:: .>(x, y)
+
+   Element-wise greater-than comparison operator.
+
+.. function:: .>=(x, y)
+
+   Element-wise greater-than-or-equals comparison operator.
 
 .. function:: cmp(x,y)
 
    Return -1, 0, or 1 depending on whether ``x<y``, ``x==y``, or ``x>y``, respectively
 
-.. function:: !
+.. function:: !(x)
 
    Boolean not
 
-.. function:: ~
+.. function:: ~(x)
 
-   Boolean or bitwise not
+   Bitwise not
 
-.. function:: &
+.. function:: &(x, y)
 
    Bitwise and
 
-.. function:: |
+.. function:: |(x, y)
 
    Bitwise or
 
-.. function:: $
+.. function:: $(x, y)
 
    Bitwise exclusive or
 
@@ -1110,11 +1327,12 @@ Mathematical Functions
 
 .. function:: sinc(x)
 
-   Compute :math:`sin(\pi x) / x`
+   Compute :math:`\sin(\pi x) / (\pi x)` if :math:`x \neq 0`, and :math:`1` if :math:`x = 0`.
 
 .. function:: cosc(x)
 
-   Compute :math:`cos(\pi x) / x`
+   Compute :math:`\cos(\pi x) / x - \sin(\pi x) / (\pi x^2)` if :math:`x \neq 0`, and :math:`0`
+   if :math:`x = 0`. This is the derivative of ``sinc(x)``.
 
 .. function:: degrees2radians(x)
 
@@ -1126,7 +1344,7 @@ Mathematical Functions
 
 .. function:: hypot(x, y)
 
-   Compute the :math:`\sqrt{(x^2+y^2)}` without undue overflow or underflow
+   Compute the :math:`\sqrt{x^2+y^2}` without undue overflow or underflow
 
 .. function:: log(x)
    
@@ -1143,14 +1361,6 @@ Mathematical Functions
 .. function:: log1p(x)
 
    Accurate natural logarithm of ``1+x``
-
-.. function:: logb(x)
-
-   Return the exponent of x, represented as a floating-point number
-
-.. function:: ilogb(x) 
-
-   Return the exponent of x, represented as a signed integer value
 
 .. function:: frexp(val, exp)
 
@@ -1396,13 +1606,19 @@ Mathematical Functions
 
    Compute the digamma function of ``x`` (the logarithmic derivative of ``gamma(x)``)
 
-.. function:: airy(x)
-              airyai(x)
+.. function:: airy(k,x)
+
+   kth derivative of the Airy function :math:`\operatorname{Ai}(x)`.
+
+.. function:: airyai(x)
 
    Airy function :math:`\operatorname{Ai}(x)`.
 
 .. function:: airyprime(x)
-              airyaiprime(x)
+
+   Airy function derivative :math:`\operatorname{Ai}'(x)`.
+
+.. function:: airyaiprime(x)
 
    Airy function derivative :math:`\operatorname{Ai}'(x)`.
 
@@ -1498,31 +1714,19 @@ Data Formats
 
    Convert an integer to an octal string, optionally specifying a number of digits to pad to.
 
-.. function:: base(b, n, [pad])
+.. function:: base(base, n, [pad])
 
-   Convert an integer to a string in the given base, optionally specifying a number of digits to pad to.
+   Convert an integer to a string in the given base, optionally specifying a number of digits to pad to. The base can be specified as either an integer, or as a ``Uint8`` array of character values to use as digit symbols.
 
 .. function:: bits(n)
 
    A string giving the literal bit representation of a number.
 
-.. function:: parse_int(type, str, [base])
+.. function:: parseint([type], str, [base])
 
-   Parse a string as an integer in the given base (default 10), yielding a number of the specified type.
+   Parse a string as an integer in the given base (default 10), yielding a number of the specified type (default ``Int``).
 
-.. function:: parse_bin(type, str)
-
-   Parse a string as an integer in base 2, yielding a number of the specified type.
-
-.. function:: parse_oct(type, str)
-
-   Parse a string as an integer in base 8, yielding a number of the specified type.
-
-.. function:: parse_hex(type, str)
-
-   Parse a string as an integer in base 16, yielding a number of the specified type.
-
-.. function:: parse_float(type, str)
+.. function:: parsefloat([type], str)
 
    Parse a string as a decimal floating point number, yielding a number of the specified type.
 
@@ -1616,6 +1820,10 @@ Data Formats
    
    For example, ``significand(15.2)/15.2 == 0.125``, and ``significand(15.2)*8 == 15.2``
 
+.. function:: exponent(x) -> Int
+
+   Get the exponent of a normalized floating-point number.
+
 .. function:: float64_valued(x::Rational)
 
    True if ``x`` can be losslessly represented as a ``Float64`` data type
@@ -1632,19 +1840,15 @@ Data Formats
 
    Convert a number or array to ``Char`` data type
 
-.. function:: safe_char(x)
-
-   Convert to ``Char``, checking for invalid code points
-
 .. function:: complex(r,i)
 
    Convert real numbers or arrays to complex
 
-.. function:: iscomplex(x)
+.. function:: iscomplex(x) -> Bool
 
    Test whether a number or array is of a complex type
 
-.. function:: isreal(x)
+.. function:: isreal(x) -> Bool
 
    Test whether a number or array is of a real type
 
@@ -1675,11 +1879,35 @@ Numbers
 
    The constant pi
 
-.. function:: isdenormal(f)
+.. data:: im
+
+   The imaginary unit
+
+.. data:: e
+
+   The constant e
+
+.. data:: Inf
+
+   Positive infinity of type Float64
+
+.. data:: Inf32
+
+   Positive infinity of type Float32
+
+.. data:: NaN
+
+   A not-a-number value of type Float64
+
+.. data:: NaN32
+
+   A not-a-number value of type Float32
+
+.. function:: isdenormal(f) -> Bool
 
    Test whether a floating point number is denormal
 
-.. function:: isfinite(f)
+.. function:: isfinite(f) -> Bool
 
    Test whether a number is finite
 
@@ -1703,7 +1931,7 @@ Numbers
 
    Get the next floating point number in lexicographic order
 
-.. function:: prevfloat(f)
+.. function:: prevfloat(f) -> Float
 
    Get the previous floating point number in lexicographic order
 
@@ -1714,14 +1942,6 @@ Numbers
 .. function:: real_valued(x)
 
    Test whether ``x`` is numerically equal to some real number
-
-.. function:: exponent(f)
-
-   Get the exponent of a floating-point number
-
-.. function:: mantissa(f)
-
-   Get the mantissa of a floating-point number
 
 .. function:: BigInt(x)
 
@@ -1776,19 +1996,20 @@ Integers
 
    Returns ``true`` if ``x`` is prime, and ``false`` otherwise.
 
-  **Example**: ``isprime(3) -> true``
+   **Example**: ``isprime(3) -> true``
 
-.. function: isodd(x::Integer) -> Bool
+.. function:: isodd(x::Integer) -> Bool
 
    Returns ``true`` if ``x`` is odd (that is, not divisible by 2), and ``false`` otherwise.
 
    **Example**: ``isodd(9) -> false``
 
-.. function: iseven(x::Integer) -> Bool
+.. function:: iseven(x::Integer) -> Bool
 
    Returns ``true`` is ``x`` is even (that is, divisible by 2), and ``false`` otherwise.
 
    **Example**: ``iseven(1) -> false``
+
 
 Random Numbers
 --------------
@@ -1805,7 +2026,7 @@ Random number generateion in Julia uses the `Mersenne Twister library <http://ww
 
 .. function:: rand()
 
-   Generate a ``Float64`` random number in (0,1)
+   Generate a ``Float64`` random number uniformly in [0,1)
 
 .. function:: rand!([rng], A)
 
@@ -1815,7 +2036,7 @@ Random number generateion in Julia uses the `Mersenne Twister library <http://ww
 
    Generate a random ``Float64`` number or array of the size specified by dims, using the specified RNG object. Currently, ``MersenneTwister`` is the only available Random Number Generator (RNG), which may be seeded using srand.
 
-.. function:: rand(dims...)
+.. function:: rand(dims or [dims...])
 
    Generate a random ``Float64`` array of the size specified by dims
 
@@ -1825,7 +2046,7 @@ Random number generateion in Julia uses the `Mersenne Twister library <http://ww
 
 .. function:: rand(r, [dims...])
 
-   Generate a random integer from ``1``:``n`` inclusive. Optionally, generate a random integer array.
+   Generate a random integer from the inclusive interval specified by ``Range1 r`` (for example, ``1:n``). Optionally, generate a random integer array.
 
 .. function:: randbool([dims...])
 
@@ -1835,7 +2056,7 @@ Random number generateion in Julia uses the `Mersenne Twister library <http://ww
 
    Fill an array with random boolean values. A may be an ``Array`` or a ``BitArray``.   
 
-.. function:: randn([dims...])
+.. function:: randn(dims or [dims...])
 
    Generate a normally-distributed random number with mean 0 and standard deviation 1. Optionally generate an array of normally-distributed random numbers.
 
@@ -1845,7 +2066,7 @@ Arrays
 Basic functions
 ~~~~~~~~~~~~~~~
 
-.. function:: ndims(A)
+.. function:: ndims(A) -> Integer
 
    Returns the number of dimensions of A
 
@@ -1857,17 +2078,21 @@ Basic functions
 
    Returns the type of the elements contained in A
 
-.. function:: length(A)
+.. function:: length(A) -> Integer
 
    Returns the number of elements in A (note that this differs from MATLAB where ``length(A)`` is the largest dimension of ``A``)
 
 .. function:: nnz(A)
 
-   Counts the number of nonzero values in A
+   Counts the number of nonzero values in array A (dense or sparse)
 
 .. function:: scale!(A, k)
 
    Scale the contents of an array A with k (in-place)
+
+.. function:: conj!(A)
+
+   Convert an array to its complex conjugate in-place
 
 .. function:: stride(A, k)
 
@@ -1884,9 +2109,9 @@ Constructors
 
    Construct an uninitialized dense array. ``dims`` may be a tuple or a series of integer arguments.
 
-.. function:: ref(type)
+.. function:: getindex(type[, elements...])
 
-   Construct an empty 1-d array of the specified type. This is usually called with the syntax ``Type[]``. Element values can be specified using ``Type[a,b,c,...]``.
+   Construct a 1-d array of the specified type. This is usually called with the syntax ``Type[]``. Element values can be specified using ``Type[a,b,c,...]``.
 
 .. function:: cell(dims)
 
@@ -1919,10 +2144,6 @@ Constructors
 
    Create an array with the same data as the given array, but with different dimensions. An implementation for a particular type of array may choose whether the data is copied or shared.
 
-.. function:: copy(A)
-
-   Create a copy of ``A``
-
 .. function:: similar(array, element_type, dims)
 
    Create an uninitialized array of the same type as the given array, but with the specified element type and dimensions. The second and third arguments are both optional. The ``dims`` argument may be a tuple or a series of integer arguments.
@@ -1930,18 +2151,6 @@ Constructors
 .. function:: reinterpret(type, A)
 
    Construct an array with the same binary data as the given array, but with the specified element type
-
-.. function:: rand(dims)
-
-   Create a random array with Float64 random values in (0,1)
-
-.. function:: randf(dims)
-
-   Create a random array with Float32 random values in (0,1)
-
-.. function:: randn(dims)
-
-   Create a random array with Float64 normally-distributed random values with a mean of 0 and standard deviation of 1
 
 .. function:: eye(n)
 
@@ -1971,21 +2180,21 @@ All mathematical operations and functions are supported for arrays
 Indexing, Assignment, and Concatenation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. function:: ref(A, ind)
+.. function:: getindex(A, ind)
 
-   Returns a subset of ``A`` as specified by ``ind``, which may be an ``Int``, a ``Range``, or a ``Vector``.
+   Returns a subset of array ``A`` as specified by ``ind``, which may be an ``Int``, a ``Range``, or a ``Vector``.
 
 .. function:: sub(A, ind)
 
-   Returns a SubArray, which stores the input ``A`` and ``ind`` rather than computing the result immediately. Calling ``ref`` on a SubArray computes the indices on the fly.
+   Returns a SubArray, which stores the input ``A`` and ``ind`` rather than computing the result immediately. Calling ``getindex`` on a SubArray computes the indices on the fly.
 
 .. function:: slicedim(A, d, i)
 
    Return all the data of ``A`` where the index for dimension ``d`` equals ``i``. Equivalent to ``A[:,:,...,i,:,:,...]`` where ``i`` is in position ``d``.
 
-.. function:: assign(A, X, ind)
+.. function:: setindex!(A, X, ind)
 
-   Store an input array ``X`` within some subset of ``A`` as specified by ``ind``.
+   Store values from array ``X`` within some subset of ``A`` as specified by ``ind``.
 
 .. function:: cat(dim, A...)
 
@@ -1999,9 +2208,12 @@ Indexing, Assignment, and Concatenation
 
    Concatenate along dimension 2
 
-.. function:: hvcat
+.. function:: hvcat(rows::(Int...), values...)
 
-   Horizontal and vertical concatenation in one call
+   Horizontal and vertical concatenation in one call. This function is called for
+   block matrix syntax. The first argument specifies the number of arguments to
+   concatenate in each block row.
+   For example, ``[a b;c d e]`` calls ``hvcat((2,3),a,b,c,d,e)``.
 
 .. function:: flipdim(A, d)
 
@@ -2027,19 +2239,35 @@ Indexing, Assignment, and Concatenation
 
    Return a vector of indexes for each dimension giving the locations of the non-zeros in ``A``.
 
+.. function:: nonzeros(A)
+
+   Return a vector of the non-zero values in array ``A``.
+
+.. function:: findfirst(A)
+
+   Return the index of the first non-zero value in ``A``.
+
+.. function:: findfirst(A,v)
+
+   Return the index of the first element equal to ``v`` in ``A``.
+
+.. function:: findfirst(predicate, A)
+
+   Return the index of the first element that satisfies the given predicate in ``A``.
+
 .. function:: permutedims(A,perm)
 
    Permute the dimensions of array ``A``. ``perm`` is a vector specifying a permutation of length ``ndims(A)``. This is a generalization of transpose for multi-dimensional arrays. Transpose is equivalent to ``permute(A,[2,1])``.
 
 .. function:: ipermutedims(A,perm)
 
-   Like ``permutedims``, except the inverse of the given permutation is applied.
+   Like :func:`permutedims`, except the inverse of the given permutation is applied.
 
 .. function:: squeeze(A, dims)
 
    Remove the dimensions specified by ``dims`` from array ``A``
 
-.. function:: vec(A)
+.. function:: vec(Array) -> Vector
 
    Vectorize an array using column-major convention.
 
@@ -2053,6 +2281,10 @@ Array functions
 .. function:: cumsum(A, [dim])
 
    Cumulative sum along a dimension.
+
+.. function:: cumsum_kbn(A, [dim])
+
+   Cumulative sum along a dimension, using the Kahan-Babuska-Neumaier compensated summation algorithm for additional accuracy.
 
 .. function:: cummin(A, [dim])
 
@@ -2084,349 +2316,42 @@ Array functions
    vector specifying the dimensions to reduce, and ``initial`` is the initial
    value to use in the reductions.
 
-Sparse Matrices
----------------
+.. function:: mapslices(f, A, dims)
 
-Sparse matrices support much of the same set of operations as dense matrices. The following functions are specific to sparse matrices.
+   Transform the given dimensions of array ``A`` using function ``f``. ``f``
+   is called on each slice of ``A`` of the form ``A[...,:,...,:,...]``.
+   ``dims`` is an integer vector specifying where the colons go in this
+   expression. The results are concatenated along the remaining dimensions.
+   For example, if ``dims`` is ``[1,2]`` and A is 4-dimensional, ``f`` is
+   called on ``A[:,:,i,j]`` for all ``i`` and ``j``.
 
-.. function:: sparse(I,J,V,[m,n,combine])
+.. function:: sum_kbn(A)
 
-   Create a sparse matrix ``S`` of dimensions ``m x n`` such that ``S[I[k], J[k]] = V[k]``. The ``combine`` function is used to combine duplicates. If ``m`` and ``n`` are not specified, they are set to ``max(I)`` and ``max(J)`` respectively. If the ``combine`` function is not supplied, duplicates are added by default.
+   Returns the sum of all array elements, using the Kahan-Babuska-Neumaier compensated summation algorithm for additional accuracy.
 
-.. function:: sparsevec(I, V, [m, combine])
-
-   Create a sparse matrix ``S`` of size ``m x 1`` such that ``S[I[k]] = V[k]``. Duplicates are combined using the ``combine`` function, which defaults to `+` if it is not provided. In julia, sparse vectors are really just sparse matrices with one column. Given Julia's Compressed Sparse Columns (CSC) storage format, a sparse column matrix with one column is sparse, whereas a sparse row matrix with one row ends up being dense.
-
-.. function:: sparsevec(D::Dict, [m])
-
-   Create a sparse matrix of size ``m x 1`` where the row values are keys from the dictionary, and the nonzero values are the values from the dictionary.
-
-.. function:: issparse(S)
-
-   Returns ``true`` if ``S`` is sparse, and ``false`` otherwise.
-
-.. function:: nnz(S)
-
-   Return the number of nonzeros in ``S``.
-
-.. function:: sparse(A)
-
-   Convert a dense matrix ``A`` into a sparse matrix.
-
-.. function:: sparsevec(A)
-
-   Convert a dense vector ``A`` into a sparse matrix of size ``m x 1``. In julia, sparse vectors are really just sparse matrices with one column.
-
-.. function:: dense(S)
-
-   Convert a sparse matrix ``S`` into a dense matrix.   
-
-.. function:: full(S)
-
-   Convert a sparse matrix ``S`` into a dense matrix.   
-
-.. function:: spzeros(m,n)
-
-   Create an empty sparse matrix of size ``m x n``.
-
-.. function:: speye(type,m[,n])
-
-   Create a sparse identity matrix of specified type of size ``m x m``. In case ``n`` is supplied, create a sparse identity matrix of size ``m x n``.
-
-.. function:: spones(S)
-
-   Create a sparse matrix with the same structure as that of ``S``, but with every nonzero element having the value ``1.0``.
-
-.. function:: sprand(m,n,density[,rng])
-
-   Create a random sparse matrix with the specified density. Nonzeros are sampled from the distribution specified by ``rng``. The uniform distribution is used in case ``rng`` is not specified.
-
-.. function:: sprandn(m,n,density)
-
-   Create a random sparse matrix of specified density with nonzeros sampled from the normal distribution.
-
-.. function:: sprandbool(m,n,density)
-
-   Create a random sparse boolean matrix with the specified density.
-
-
-Linear Algebra
---------------
-
-Linear algebra functions in Julia are largely implemented by calling functions from `LAPACK <http://www.netlib.org/lapack/>`_.
-
-.. function:: *
-
-   Matrix multiplication
-
-.. function:: \
-
-   Matrix division using a polyalgorithm. For input matrices ``A`` and ``B``, the result ``X`` is such that ``A*X == B``. For rectangular ``A``, QR factorization is used. For triangular ``A``, a triangular solve is performed. For square ``A``, Cholesky factorization is tried if the input is symmetric with a heavy diagonal. LU factorization is used in case Cholesky factorization fails or for general square inputs. If ``size(A,1) > size(A,2)``, the result is a least squares solution of ``A*X+eps=B`` using the singular value decomposition. ``A`` does not need to have full rank.
-
-.. function:: dot
-
-   Compute the dot product
-
-.. function:: cross
-
-   Compute the cross product of two 3-vectors
-
-.. function:: norm
-
-   Compute the norm of a ``Vector`` or a ``Matrix``
-
-.. function:: factors(F)
-
-   Return the factors of a factorization ``F``. For example, in the case of an LU decomposition, factors(LU) -> L, U, P
-
-.. function:: lu(A) -> L, U, P
-
-   Compute the LU factorization of ``A``, such that ``A[P,:] = L*U``.
-
-.. function:: lufact(A) -> LUDense
-
-   Compute the LU factorization of ``A`` and return a ``LUDense`` object. ``factors(lufact(A))`` returns the triangular matrices containing the factorization. The following functions are available for ``LUDense`` objects: ``size``, ``factors``, ``\``, ``inv``, ``det``.
-
-.. function:: lufact!(A) -> LUDense
-
-   ``lufact!`` is the same as ``lufact`` but saves space by overwriting the input A, instead of creating a copy.
-
-.. function:: chol(A, [LU]) -> F
-
-   Compute Cholesky factorization of a symmetric positive-definite matrix ``A`` and return the matrix ``F``. If ``LU`` is ``L`` (Lower), ``A = L*L'``. If ``LU`` is ``U`` (Upper), ``A = R'*R``.
-
-.. function:: cholfact(A, [LU]) -> CholeskyDense
-
-   Compute the Cholesky factorization of a symmetric positive-definite matrix ``A`` and return a ``CholeskyDense`` object. ``LU`` may be 'L' for using the lower part or 'U' for the upper part. The default is to use 'U'. ``factors(cholfact(A))`` returns the triangular matrix containing the factorization. The following functions are available for ``CholeskyDense`` objects: ``size``, ``factors``, ``\``, ``inv``, ``det``. A ``LAPACK.PosDefException`` error is thrown in case the matrix is not positive definite.
-
-.. function: cholfact!(A, [LU]) -> CholeskyDense
-
-   ``cholfact!`` is the same as ``cholfact`` but saves space by overwriting the input A, instead of creating a copy.
-
-..  function:: cholpfact(A, [LU]) -> CholeskyPivotedDense
-
-   Compute the pivoted Cholesky factorization of a symmetric positive semi-definite matrix ``A`` and return a ``CholeskyDensePivoted`` object. ``LU`` may be 'L' for using the lower part or 'U' for the upper part. The default is to use 'U'. ``factors(cholpfact(A))`` returns the triangular matrix containing the factorization. The following functions are available for ``CholeskyDensePivoted`` objects: ``size``, ``factors``, ``\``, ``inv``, ``det``. A ``LAPACK.RankDeficientException`` error is thrown in case the matrix is rank deficient.
-
-.. function:: cholpfact!(A, [LU]) -> CholeskyPivotedDense
-
-   ``cholpfact!`` is the same as ``cholpfact`` but saves space by overwriting the input A, instead of creating a copy.
-
-.. function:: qr(A) -> Q, R
-
-   Compute the QR factorization of ``A`` such that ``A = Q*R``. Also see ``qrd``.
-
-.. function:: qrfact(A)
-
-   Compute the QR factorization of ``A`` and return a ``QRDense`` object. ``factors(qrfact(A))`` returns ``Q`` and ``R``. The following functions are available for ``QRDense`` objects: ``size``, ``factors``, ``qmulQR``, ``qTmulQR``, ``\``. 
-
-.. function:: qrfact!(A)
-
-   ``qrfact!`` is the same as ``qrfact`` but saves space by overwriting the input A, instead of creating a copy.
-
-.. function:: qrp(A) -> Q, R, P
-
-   Compute the QR factorization of ``A`` with pivoting, such that ``A*I[:,P] = Q*R``, where ``I`` is the identity matrix. Also see ``qrpfact``.
-
-.. function:: qrpfact(A) -> QRPivotedDense
-
-   Compute the QR factorization of ``A`` with pivoting and return a ``QRDensePivoted`` object. ``factors(qrpfact(A))`` returns ``Q`` and ``R``. The following functions are available for ``QRDensePivoted`` objects: ``size``, ``factors``, ``qmulQR``, ``qTmulQR``, ``\``. 
-
-.. function:: qrpfact!(A) -> QRPivotedDense
-
-   ``qrpfact!`` is the same as ``qrpfact`` but saves space by overwriting the input A, instead of creating a copy.
-
-.. function:: qmulQR(QR, A)
-   
-   Perform Q*A efficiently, where Q is a an orthogonal matrix defined as the product of k elementary reflectors from the QR decomposition.
-
-.. function:: qTmulQR(QR, A)
-
-   Perform Q'*A efficiently, where Q is a an orthogonal matrix defined as the product of k elementary reflectors from the QR decomposition.
-
-.. function:: sqrtm(A)
-
-   Compute the matrix square root of ``A``. If ``B = sqrtm(A)``, then ``B*B == A`` within roundoff error.
-
-.. function:: eig(A) -> D, V
-
-   Compute eigenvalues and eigenvectors of A
-
-.. function:: eigvals(A)
-
-   Returns the eigenvalues of ``A``.
-
-.. function:: svdfact(A, [thin]) -> SVDDense
-
-   Compute the Singular Value Decomposition (SVD) of ``A`` and return an ``SVDDense`` object. ``factors(svdfact(A))`` returns ``U``, ``S``, and ``Vt``, such that ``A = U*diagm(S)*Vt``. If ``thin`` is ``true``, an economy mode decomposition is returned.
-
-.. function:: svdfact!(A, [thin]) -> SVDDense
-
-   ``svdfact!`` is the same as ``svdfact`` but saves space by overwriting the input A, instead of creating a copy. If ``thin`` is ``true``, an economy mode decomposition is returned.
-
-.. function:: svd(A, [thin]) -> U, S, V
-
-   Compute the SVD of A, returning ``U``, ``S``, and ``V`` such that ``A = U*S*V'``. If ``thin`` is ``true``, an economy mode decomposition is returned.
-
-.. function:: svdt(A, [thin]) -> U, S, Vt
-
-   Compute the SVD of A, returning ``U``, ``S``, and ``Vt`` such that ``A = U*S*Vt``. If ``thin`` is ``true``, an economy mode decomposition is returned.
-
-.. function:: svdvals(A)
-
-   Returns the singular values of ``A``.
-
-.. function:: svdvals!(A)
-
-   Returns the singular values of ``A``, while saving space by overwriting the input.
-
-.. function:: svdfact(A, B) -> GSVDDense
-
-   Compute the generalized SVD of ``A`` and ``B``, returning a ``GSVDDense`` Factorization object. ``factors(svdfact(A,b))`` returns ``U``, ``V``, ``Q``, ``D1``, ``D2``, and ``R0`` such that ``A = U*D1*R0*Q'`` and ``B = V*D2*R0*Q'``.
-   
-.. function:: svd(A, B) -> U, V, Q, D1, D2, R0
-
-   Compute the generalized SVD of ``A`` and ``B``, returning ``U``, ``V``, ``Q``, ``D1``, ``D2``, and ``R0`` such that ``A = U*D1*R0*Q'`` and ``B = V*D2*R0*Q'``.
- 
-.. function:: svdvals(A, B)
-
-   Return only the singular values from the generalized singular value decomposition of ``A`` and ``B``.
-
-.. function:: triu(M)
-
-   Upper triangle of a matrix
-
-.. function:: tril(M)
-
-   Lower triangle of a matrix
-
-.. function:: diag(M, [k])
-
-   The ``k``-th diagonal of a matrix, as a vector
-
-.. function:: diagm(v, [k])
-
-   Construct a diagonal matrix and place ``v`` on the ``k``-th diagonal
-
-.. function:: diagmm(matrix, vector)
-
-   Multiply matrices, interpreting the vector argument as a diagonal matrix.
-   The arguments may occur in the other order to multiply with the diagonal
-   matrix on the left.
-
-.. function:: Tridiagonal(dl, d, du)
-
-   Construct a tridiagonal matrix from the lower diagonal, diagonal, and upper diagonal
-
-.. function:: Woodbury(A, U, C, V)
-
-   Construct a matrix in a form suitable for applying the Woodbury matrix identity
-
-.. function:: rank(M)
-
-   Compute the rank of a matrix
-
-.. function:: norm(A, [p])
-
-   Compute the ``p``-norm of a vector or a matrix. ``p`` is ``2`` by default, if not provided. If ``A`` is a vector, ``norm(A, p)`` computes the ``p``-norm. ``norm(A, Inf)`` returns the largest value in ``abs(A)``, whereas ``norm(A, -Inf)`` returns the smallest. If ``A`` is a matrix, valid values for ``p`` are ``1``, ``2``, or ``Inf``. In order to compute the Frobenius norm, use ``normfro``.
-
-.. function:: normfro(A)
-
-   Compute the Frobenius norm of a matrix ``A``.
-
-.. function:: cond(M, [p])
-
-   Matrix condition number, computed using the p-norm. ``p`` is 2 by default, if not provided. Valid values for ``p`` are ``1``, ``2``, or ``Inf``.
-
-.. function:: trace(M)
-
-   Matrix trace
-
-.. function:: det(M)
-
-   Matrix determinant
-
-.. function:: inv(M)
-
-   Matrix inverse
-
-.. function:: pinv(M)
-
-   Moore-Penrose inverse
-
-.. function:: null(M)
-
-   Basis for null space of M
-
-.. function:: repmat(A, n, m)
-
-   Construct a matrix by repeating the given matrix ``n`` times in dimension 1 and ``m`` times in dimension 2.
-
-.. function:: kron(A, B)
-
-   Kronecker tensor product of two vectors or two matrices.
-
-.. function:: linreg(x, y)
-
-   Determine parameters ``[a, b]`` that minimize the squared error between ``y`` and ``a+b*x``.
-
-.. function:: linreg(x, y, w)
-
-   Weighted least-squares linear regression
-
-.. function:: expm(A)
-
-   Matrix exponential.
-
-.. function:: issym(A)
-
-   Test whether a matrix is symmetric.
-
-.. function:: isposdef(A)
-
-   Test whether a matrix is positive-definite.
-
-.. function:: istril(A)
-
-   Test whether a matrix is lower-triangular.
-
-.. function:: istriu(A)
-
-   Test whether a matrix is upper-triangular.
-
-.. function:: ishermitian(A)
-
-   Test whether a matrix is hermitian.
-
-.. function:: transpose(A)
-
-   The transpose operator (.').
-
-.. function:: ctranspose(A)
-
-   The conjugate transpose operator (').
 
 Combinatorics
 -------------
 
 .. function:: nthperm(v, k)
 
-   Compute the kth lexicographic permutation of a vector
+   Compute the kth lexicographic permutation of a vector.
 
 .. function:: nthperm!(v, k)
 
-   In-place version of ``nthperm``
+   In-place version of :func:`nthperm`.
 
 .. function:: randperm(n)
 
-   Construct a random permutation of the given length
+   Construct a random permutation of the given length.
 
 .. function:: invperm(v)
 
-   Return the inverse permtation of v
+   Return the inverse permutation of v.
 
-.. function:: isperm(v)
+.. function:: isperm(v) -> Bool
 
-   Returns true if v is a valid permutation
+   Returns true if v is a valid permutation.
 
 .. function:: permute!(v, p)
 
@@ -2442,23 +2367,23 @@ Combinatorics
 
 .. function:: randcycle(n)
 
-   Construct a random cyclic permutation of the given length
+   Construct a random cyclic permutation of the given length.
 
 .. function:: shuffle(v)
 
-   Randomly rearrange the elements of a vector
+   Randomly rearrange the elements of a vector.
 
 .. function:: shuffle!(v)
 
-   In-place version of ``shuffle``
+   In-place version of :func:`shuffle`.
 
 .. function:: reverse(v)
 
-   Reverse vector ``v``
+   Reverse vector ``v``.
 
-.. function:: reverse!(v)
+.. function:: reverse!(v) -> v
 
-   Reverse vector ``v`` in-place
+   In-place version of :func:`reverse`.
 
 .. function:: combinations(array, n)
 
@@ -2485,37 +2410,53 @@ Combinatorics
 Statistics
 ----------
 
-.. function:: mean(v, [dim])
+.. function:: mean(v[, region])
 
-   Compute the mean of whole array ``v``, or optionally along dimension ``dim``
+   Compute the mean of whole array ``v``, or optionally along the dimensions in ``region``.
 
-.. function:: std(v, [corrected])
+.. function:: std(v[, region])
 
-   Compute the sample standard deviation of a vector ``v``. If the optional argument ``corrected`` is either left unspecified or is explicitly set to the default value of ``true``, then the algorithm will return an estimator of the generative distribution's standard deviation under the assumption that each entry of ``v`` is an IID draw from that generative distribution. This computation is equivalent to calculating ``sqrt(sum((v .- mean(v)).^2) / (length(v) - 1))`` and involves an implicit correction term sometimes called the Bessel correction which insures that the estimator of the variance is unbiased. If, instead, the optional argument ``corrected`` is set to ``false``, then the algorithm will produce the equivalent of ``sqrt(sum((v .- mean(v)).^2) / length(v))``, which is the empirical standard deviation of the sample.
+   Compute the sample standard deviation of a vector or array``v``, optionally along dimensions in ``region``. The algorithm returns an estimator of the generative distribution's standard deviation under the assumption that each entry of ``v`` is an IID draw from that generative distribution. This computation is equivalent to calculating ``sqrt(sum((v - mean(v)).^2) / (length(v) - 1))``.
 
-.. function:: std(v, m, [corrected])
+.. function:: stdm(v, m)
 
-   Compute the sample standard deviation of a vector ``v`` with known mean ``m``. If the optional argument ``corrected`` is either left unspecified or is explicitly set to the default value of ``true``, then the algorithm will return an estimator of the generative distribution's standard deviation under the assumption that each entry of ``v`` is an IID draw from that generative distribution. This computation is equivalent to calculating ``sqrt(sum((v .- m).^2) / (length(v) - 1))`` and involves an implicit correction term sometimes called the Bessel correction which insures that the estimator of the variance is unbiased. If, instead, the optional argument ``corrected`` is set to ``false``, then the algorithm will produce the equivalent of ``sqrt(sum((v .- m).^2) / length(v))``, which is the empirical standard deviation of the sample.
+   Compute the sample standard deviation of a vector ``v`` with known mean ``m``.
 
-.. function:: var(v, [corrected])
+.. function:: var(v[, region])
 
-   Compute the sample variance of a vector ``v``. If the optional argument ``corrected`` is either left unspecified or is explicitly set to the default value of ``true``, then the algorithm will return an unbiased estimator of the generative distribution's variance under the assumption that each entry of ``v`` is an IID draw from that generative distribution. This computation is equivalent to calculating ``sum((v .- mean(v)).^2) / (length(v) - 1)`` and involves an implicit correction term sometimes called the Bessel correction. If, instead, the optional argument ``corrected`` is set to ``false``, then the algorithm will produce the equivalent of ``sum((v .- mean(v)).^2) / length(v)``, which is the empirical variance of the sample.
+   Compute the sample variance of a vector or array``v``, optionally along dimensions in ``region``. The algorithm will return an estimator of the generative distribution's variance under the assumption that each entry of ``v`` is an IID draw from that generative distribution. This computation is equivalent to calculating ``sum((v - mean(v)).^2) / (length(v) - 1)``.
 
-.. function:: var(v, m, [corrected])
+.. function:: varm(v, m)
 
-   Compute the sample variance of a vector ``v`` with known mean ``m``. If the optional argument ``corrected`` is either left unspecified or is explicitly set to the default value of ``true``, then the algorithm will return an unbiased estimator of the generative distribution's variance under the assumption that each entry of ``v`` is an IID draw from that generative distribution. This computation is equivalent to calculating ``sum((v .- m)).^2) / (length(v) - 1)`` and involves an implicit correction term sometimes called the Bessel correction. If, instead, the optional argument ``corrected`` is set to ``false``, then the algorithm will produce the equivalent of ``sum((v .- m)).^2) / length(v)``, which is the empirical variance of the sample.
+   Compute the sample variance of a vector ``v`` with known mean ``m``.
 
 .. function:: median(v)
 
-   Compute the median of a vector ``v``
+   Compute the median of a vector ``v``.
 
-.. function:: hist(v, [n])
+.. function:: hist(v[, n]) -> e, counts
 
-   Compute the histogram of ``v``, optionally using ``n`` bins
+   Compute the histogram of ``v``, optionally using approximately ``n``
+   bins. The return values are a range ``e``, which correspond to the
+   edges of the bins, and ``counts`` containing the number of elements of
+   ``v`` in each bin.
 
-.. function:: hist(v, e)
+.. function:: hist(v, e) -> e, counts
 
-   Compute the histogram of ``v`` using a vector ``e`` as the edges for the bins
+   Compute the histogram of ``v`` using a vector/range ``e`` as the edges for
+   the bins. The result will be a vector of length ``length(e) - 1``, with the
+   ``i``th element being ``sum(e[i] .< v .<= e[i+1])``.
+
+.. function:: histrange(v, n)
+
+   Compute `nice` bin ranges for the edges of a histogram of ``v``, using
+   approximately ``n`` bins. The resulting step sizes will be 1, 2 or 5
+   multiplied by a power of 10.
+
+.. function:: midpoints(e)
+
+   Compute the midpoints of the bins with edges ``e``. The result is a
+   vector/range of length ``length(e) - 1``. 
 
 .. function:: quantile(v, p)
 
@@ -2525,13 +2466,17 @@ Statistics
 
    Compute the quantiles of a vector ``v`` at the probability values ``[.0, .2, .4, .6, .8, 1.0]``.
 
-.. function:: cov(v)
+.. function:: cov(v1[, v2])
 
-   Compute the Pearson covariance between two vectors ``v1`` and ``v2``.
+   Compute the Pearson covariance between two vectors ``v1`` and ``v2``. If
+   called with a single element ``v``, then computes covariance of columns of
+   ``v``.
 
-.. function:: cor(v)
+.. function:: cor(v1[, v2])
 
-   Compute the Pearson correlation between two vectors ``v1`` and ``v2``.
+   Compute the Pearson correlation between two vectors ``v1`` and ``v2``. If
+   called with a single element ``v``, then computes correlation of columns of
+   ``v``.
 
 Signal Processing
 -----------------
@@ -2556,7 +2501,7 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
    Same as :func:`fft`, but operates in-place on ``A``,
    which must be an array of complex floating-point numbers.
 
-.. function:: ifft(A [, dims]), bfft, bfft!
+.. function:: ifft(A [, dims])
 
    Multidimensional inverse FFT.
 
@@ -2585,7 +2530,7 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
 
    Same as :func:`bfft`, but operates in-place on ``A``.
 
-.. function:: plan_fft(A [, dims [, flags [, timelimit]]]),  plan_ifft, plan_bfft
+.. function:: plan_fft(A [, dims [, flags [, timelimit]]])
 
    Pre-plan an optimized FFT along given dimensions (``dims``) of arrays
    matching the shape and type of ``A``.  (The first two arguments have
@@ -2606,6 +2551,16 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
    complex floating-point numbers).  :func:`plan_ifft` and so on
    are similar but produce plans that perform the equivalent of
    the inverse transforms :func:`ifft` and so on.
+
+.. function:: plan_ifft(A [, dims [, flags [, timelimit]]])
+
+   Same as :func:`plan_fft`, but produces a plan that performs inverse transforms
+   :func:`ifft`.
+
+.. function:: plan_bfft(A [, dims [, flags [, timelimit]]])
+
+   Same as :func:`plan_fft`, but produces a plan that performs an unnormalized
+   backwards transform :func:`bfft`.
 
 .. function:: plan_fft!(A [, dims [, flags [, timelimit]]])
 
@@ -2658,7 +2613,7 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
    arguments, and the size of the transformed result, are the same as
    for :func:`rfft`.
 
-.. function:: plan_irfft(A, d [, dims [, flags [, timelimit]]]), plan_bfft
+.. function:: plan_irfft(A, d [, dims [, flags [, timelimit]]])
 
    Pre-plan an optimized inverse real-input FFT, similar to :func:`plan_rfft`
    except for :func:`irfft` and :func:`brfft`, respectively.  The first
@@ -2715,12 +2670,12 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
 
    Same as :func:`plan_idct`, but operates in-place on ``A``.
 
-.. function:: FFTW.r2r(A, kind [, dims]), FFTW.r2r!
+.. function:: FFTW.r2r(A, kind [, dims])
 
    Performs a multidimensional real-input/real-output (r2r) transform
    of type ``kind`` of the array ``A``, as defined in the FFTW manual.
    ``kind`` specifies either a discrete cosine transform of various types
-   (``FFTW.REDFT00``, ``FFTW.REDFT01``,``FFTW.REDFT10``, or
+   (``FFTW.REDFT00``, ``FFTW.REDFT01``, ``FFTW.REDFT10``, or
    ``FFTW.REDFT11``), a discrete sine transform of various types 
    (``FFTW.RODFT00``, ``FFTW.RODFT01``, ``FFTW.RODFT10``, or
    ``FFTW.RODFT11``), a real-input DFT with halfcomplex-format output
@@ -2731,22 +2686,28 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
    for any unspecified dimensions.  See the FFTW manual for precise
    definitions of these transform types, at `<http://www.fftw.org/doc>`.
 
-   The optional ``dims``argument specifies an iterable subset of
+   The optional ``dims`` argument specifies an iterable subset of
    dimensions (e.g. an integer, range, tuple, or array) to transform
-   along.  ``kind[i]`` is then the transform type for ``dims[i]``,
+   along. ``kind[i]`` is then the transform type for ``dims[i]``,
    with ``kind[end]`` being used for ``i > length(kind)``.
 
    See also :func:`FFTW.plan_r2r` to pre-plan optimized r2r transforms.
+
+.. function:: FFTW.r2r!(A, kind [, dims])
 
    :func:`FFTW.r2r!` is the same as :func:`FFTW.r2r`, but operates
    in-place on ``A``, which must be an array of real or complex 
    floating-point numbers.
 
-.. function:: FFTW.plan_r2r(A, kind [, dims [, flags [, timelimit]]]), FFTW.plan_r2r!
+.. function:: FFTW.plan_r2r(A, kind [, dims [, flags [, timelimit]]])
 
    Pre-plan an optimized r2r transform, similar to :func:`plan_fft`
    except that the transforms (and the first three arguments)
    correspond to :func:`FFTW.r2r` and :func:`FFTW.r2r!`, respectively.
+
+.. function:: FFTW.plan_r2r!(A, kind [, dims [, flags [, timelimit]]])
+
+   Similar to :func:`plan_fft`, but corresponds to :func:`FFTW.r2r!`.
 
 .. function:: fftshift(x)
 
@@ -2889,6 +2850,10 @@ System
 
    Run a command object, constructed with backticks. Throws an error if anything goes wrong, including the process exiting with a non-zero status.
 
+.. function:: spawn(command)
+
+   Run a command object asynchronously, returning the resulting ``Process`` object.
+
 .. function:: success(command)
 
    Run a command object, constructed with backticks, and tell whether it was successful (exited with a code of 0).
@@ -2901,25 +2866,41 @@ System
 
    Starts running a command asynchronously, and returns a tuple (stream,process). The first value is a stream writing to the process' standard input.
 
-.. function:: > < >> .>
+.. function:: readandwrite(command)
 
-   ``>`` ``<`` and ``>>`` work exactly as in bash, and ``.>`` redirects STDERR.
+   Starts running a command asynchronously, and returns a tuple (stdout,stdin,process) of the output stream and input stream of the process, and the process object itself.
 
-   **Example**: ``run((`ls` > "out.log") .> "err.log")``
+.. function:: >
 
-.. function:: gethostname()
+   Redirect standard output of a process.
+
+   **Example**: ``run(`ls` > "out.log")``
+
+.. function:: <
+
+   Redirect standard input of a process.
+
+.. function:: >>
+
+   Redirect standard output of a process, appending to the destination file.
+
+.. function:: .>
+
+   Redirect the standard error stream of a process.
+
+.. function:: gethostname() -> String
 
    Get the local machine's host name.
 
-.. function:: getipaddr()
+.. function:: getipaddr() -> String
 
    Get the IP address of the local machine, as a string of the form "x.x.x.x".
 
-.. function:: pwd()
+.. function:: pwd() -> String
 
    Get the current working directory.
 
-.. function:: cd("dir")
+.. function:: cd(dir::String)
 
    Set the current working directory. Returns the new current directory.
 
@@ -2932,17 +2913,22 @@ System
    Make a new directory with name ``path`` and permissions ``mode``.
    ``mode`` defaults to 0o777, modified by the current file creation mask.
 
+.. function:: mkpath(path, [mode])
+
+   Create all directories in the given ``path``, with permissions ``mode``.
+   ``mode`` defaults to 0o777, modified by the current file creation mask.
+
 .. function:: rmdir(path)
 
    Remove the directory named ``path``.
 
-.. function:: getpid()
+.. function:: getpid() -> Int32
 
    Get julia's process ID.
 
 .. function:: time()
 
-   Get the time in seconds since the epoch, with fairly high (typically, microsecond) resolution.
+   Get the system time in seconds since the epoch, with fairly high (typically, microsecond) resolution.
 
 .. function:: time_ns()
 
@@ -2950,32 +2936,95 @@ System
 
 .. function:: tic()
 
-   Set a timer to be read by the next call to ``toc`` or ``toq``. The macro call ``@time expr`` can also be used to time evaluation.
+   Set a timer to be read by the next call to :func:`toc` or :func:`toq`. The macro call ``@time expr`` can also be used to time evaluation.
 
 .. function:: toc()
 
-   Print and return the time elapsed since the last ``tic``
+   Print and return the time elapsed since the last :func:`tic`.
 
 .. function:: toq()
 
-   Return, but do not print, the time elapsed since the last ``tic``
+   Return, but do not print, the time elapsed since the last :func:`tic`.
 
-.. function:: EnvHash()
+.. function:: EnvHash() -> EnvHash
 
-   A singleton of this type, ``ENV``, provides a hash table interface to environment variables.
+   A singleton of this type provides a hash table interface to environment variables.
 
-.. function:: dlopen(libfile)
+.. data:: ENV
 
-   Load a shared library, returning an opaque handle
+   Reference to the singleton ``EnvHash``, providing a dictionary interface to system environment variables.
+
+C Interface
+-----------
+
+.. function:: ccall((symbol, library) or fptr, RetType, (ArgType1, ...), ArgVar1, ...)
+
+   Call function in C-exported shared library, specified by (function name, library) tuple (String or :Symbol). Alternatively, ccall may be used to call a function pointer returned by dlsym, but note that this usage is generally discouraged to facilitate future static compilation.
+
+.. function:: cfunction(fun::Function, RetType::Type, (ArgTypes...))
+   
+   Generate C-callable function pointer from Julia function.
+
+.. function:: dlopen(libfile::String [, flags::Integer])
+
+   Load a shared library, returning an opaque handle.
+
+   The optional flags argument is a bitwise-or of zero or more of
+   RTLD_LOCAL, RTLD_GLOBAL, RTLD_LAZY, RTLD_NOW, RTLD_NODELETE,
+   RTLD_NOLOAD, RTLD_DEEPBIND, and RTLD_FIRST.  These are converted to
+   the corresponding flags of the POSIX (and/or GNU libc and/or MacOS)
+   dlopen command, if possible, or are ignored if the specified
+   functionality is not available on the current platform.  The
+   default is RTLD_LAZY|RTLD_DEEPBIND|RTLD_LOCAL.  An important usage
+   of these flags, on POSIX platforms, is to specify
+   RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL in order for the library's
+   symbols to be available for usage in other shared libraries, in
+   situations where there are dependencies between shared libraries.
 
 .. function:: dlsym(handle, sym)
 
-   Look up a symbol from a shared library handle
+   Look up a symbol from a shared library handle, return callable function pointer on success.
+
+.. function:: dlsym_e(handle, sym)
+   
+   Look up a symbol from a shared library handle, silently return NULL pointer on lookup failure.
+
+.. function:: dlclose(handle)
+
+   Close shared library referenced by handle.
+
+.. function:: c_free(addr::Ptr)
+  
+   Call free() from C standard library.
+
+.. function:: unsafe_ref(p::Ptr{T},i::Integer)
+
+   Dereference the pointer ``p[i]`` or ``*p``, returning a copy of type T.
+
+.. function:: unsafe_assign(p::Ptr{T},x,i::Integer)
+
+   Assign to the pointer ``p[i] = x`` or ``*p = x``, making a copy of object x into the memory at p.
+
+.. function:: pointer(a[, index])
+
+   Get the native address of an array element. Be careful to ensure that a julia
+   reference to ``a`` exists as long as this pointer will be used.
+
+.. function:: pointer(type, int)
+
+   Convert an integer to a pointer of the specified element type.
+
+.. function:: pointer_to_array(p, dims[, own])
+
+   Wrap a native pointer as a Julia Array object. The pointer element type determines
+   the array element type. ``own`` optionally specifies whether Julia should take
+   ownership of the memory, calling ``free`` on the pointer when the array is no
+   longer referenced.
 
 Errors
 ------
 
-.. function:: error(message)
+.. function:: error(message::String)
 
    Raise an error with the given message
 
