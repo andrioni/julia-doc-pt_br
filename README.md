@@ -1,6 +1,8 @@
 README da Documentação de Julia
 ===============================
 
+### A documentação pode ser visualizada online no [ReadTheDocs](https://julia_pt-br.readthedocs.org/en/latest/)!
+
 A documentação de Julia está escrita em reStructuredText, e uma boa referência 
 é o capítulo [Documenting Python](http://docs.python.org/devguide/documenting.html)
 do Python Developer's Guide.
