@@ -44,29 +44,18 @@ Ao traduzir parte da documentação, preferencialmente utilize a lista, em ordem
 alfabética dos termos em inglês, a seguir para alguns termos técnicos que não
 possuem tradução para o português.
 
-+--------------------------------------+--------------------------------------+
-+ Inglês                               + Português                            +
-+--------------------------------------+--------------------------------------+
-+ API                                  + *API*                                +
-+--------------------------------------+--------------------------------------+
-+ features                             + características                      +
-+--------------------------------------+--------------------------------------+
-+ departures                           + características                      +
-+--------------------------------------+--------------------------------------+
-+ environment                          + ambiente                             +
-+--------------------------------------+--------------------------------------+
-+ just-in-time                         + *just-in-time*                       +
-+--------------------------------------+--------------------------------------+
-+ metaprogramming                      + *metaprogramming*                    +
-+--------------------------------------+--------------------------------------+
-+ multiple dispatch                    + *multiple dispatch*                  +
-+--------------------------------------+--------------------------------------+
-+ performance                          + desempenho                           +
-+--------------------------------------+--------------------------------------+
-+ prototyping                          + experimentação                       +
-+--------------------------------------+--------------------------------------+
-+ wrapper                              + *wrapper*                            +
-+--------------------------------------+--------------------------------------+
+| Inglês                               | Português                            |
+|--------------------------------------|--------------------------------------|
+| API                                  | *API*                                |
+| features                             | características                      |
+| departures                           | características                      |
+| environment                          | ambiente                             |
+| just-in-time                         | *just-in-time*                       |
+| metaprogramming                      | *metaprogramming*                    |
+| multiple dispatch                    | *multiple dispatch*                  |
+| performance                          | desempenho                           |
+| prototyping                          | experimentação                       |
+| wrapper                              | *wrapper*                            |
 
 Julia Documentation README
 ==========================
