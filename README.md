@@ -53,11 +53,12 @@ possuem tradução para o português.
 | departures                           | características                      |
 | environment                          | ambiente                             |
 | just-in-time                         | *just-in-time*                       |
-| metaprogramming                      | *metaprogramming*                    |
 | multiple dispatch                    | *multiple dispatch*                  |
 | performance                          | desempenho                           |
 | prototyping                          | experimentação                       |
 | wrapper                              | *wrapper*                            |
+| string                               | *string*                             |
+| typing                               | tipagem                              |
 
 Julia Documentation README
 ==========================

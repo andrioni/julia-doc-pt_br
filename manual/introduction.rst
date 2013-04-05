@@ -5,7 +5,7 @@
 **************
 
 Computação científica tem requerido, tradicionalmente, alta performace embora
-grandes nomes da área tenham passado a utilizar linguagems dinâmicas lentas
+grandes nomes da área tenham passado a utilizar linguagens dinâmicas lentas
 para o trabalho diário. Acreditamos que existam várias boas razões para
 preferir utilizar linguagens dinâmicas em suas aplicações, e não esperamos
 desmerecer seu uso. Felizmente, as modernas técnicas para criação de linguagens
@@ -15,9 +15,8 @@ experimentação e eficiente para produção de aplicativos que precisam de alto
 desempenho. A linguagem de programação Julia preenche esse buraco: é uma
 linguagem dinâmica, apropriada para computação numérica e científica, com um
 desempenho comparável a linguagens estáticas tradicionalmente utilizadas.
-Scientific computing has traditionally required the highest performance
 
-As características de Julia são fácil escrita, *multiple dispatch*, e bom
+As características de Julia são tipagem opcional, *multiple dispatch*, e bom
 desempenho, alcançado utilizando inferência de tipos e compilação
 *just-in-time* (JIT) [#JIT-en]_, [#JIT-pt]_,
 implementada utilizando
@@ -28,7 +27,7 @@ funcional e orientada a objetos. A sintaxe de Julia é similar a do `GNU Octave
 <http://en.wikipedia.org/wiki/Matlab>`_ e consequentemente os programadores que
 que já utilizam estas linguagens devem sentir-se imediatamente confortáveis com
 Julia. Enquanto MATLAB(R) é um bem eficiente para experimentações e explorações
-de algebra linear numérica, possui limitações para tarefas computacionais fora
+de álgebra linear numérica, possui limitações para tarefas computacionais fora
 deste campo relativamente pequeno. Julia mantem a facilidade e expressividade
 do MATLAB(R) para computação numérica de alto nível, mas ultrapassa as
 limitações comparadas a uma linguagem de programação de propósito geral. Para
@@ -42,9 +41,9 @@ incluindo
 `Ruby <http://en.wikipedia.org/wiki/Ruby_(programming_language)>`_.
 
 As características mas significativas de Julia em relação a linguagens
-tipicamente dinâmica são:
+dinâmicas típicas são:
 
--  O Núcleo da linguagem impõe muito pouco; a biblioteca padrão é escrita
+-  O núcleo da linguagem impõe muito pouco; a biblioteca padrão é escrita
    utilizando a própria linguagem Julia, incluindo operadores primitivos como
    operações aritméticas de inteiros
 -  Uma grande variedades de tipos para construir e descrever objetos, que pode
@@ -55,7 +54,7 @@ tipicamente dinâmica são:
    de argumentos
 -  Bom desempenho, aproximando-se de linguagens estáticas e compiladas como C
 
-Embora alguém alguma vez disse que linguagens dinâmicas não são tipadas,
+Embora alguns por vezes digam que linguagens dinâmicas não são tipadas,
 elas definitivamente são: todo objeto, seja primitivo ou definido pelo usuário,
 possui um tipo. A ausência na declaração do tipo na maioria das linguagens
 dinâmicas, entretanto, significa que não podemos instruir o compilador sobre o
@@ -65,7 +64,6 @@ especificar tipos para o compilador, tipos existem apenas em tempo de
 compilação e não podem ser manipulados ou expressos em tempo de execução. Em
 Julia, tipos são objetos em tempo de execução, e podem também ser utilizados
 para convenientemente informar o compilador.
-Although one sometimes speaks of dynamic la
 
 Embora o programador casual não precise explicitamente utilizar tipos ou
 *multiple dispatch*, estas são características principais de Julia: funções são
@@ -73,10 +71,9 @@ definidas para diferentes combinações de tipos de argumentos, e utilizadas de
 acordo com as especificações mais semelhantes. Este modelo ser para programação
 matemáticas, onde não é natural o primeiro argumento "possuir" uma operação
 como é tradicional em linguagens orientadas a objetos. Operadores são apenas
-funções com uma função especial - para extender a adição para um novo tipo
+funções com uma função especial - para estender a adição para um novo tipo
 definido pelo usuário, você define um novo método para a função ``+``. Codes já
 existentes são aplicados para novos tipos sem problemas.
-While the casual programmer need not explicitly use typ
 
 Parcialmente por causa da inferência de tipos em tempo de execução (aumentado
 pela opcionalidade da declaração de tipo), e parcialmente por causa do grande
@@ -86,9 +83,8 @@ linguagens estáticas e compiladas. Para problemas numéricos de larga escala,
 velocidade sempre foi, continua sendo, e provavelmente sempre será crucial: a
 quantidade de dados sendo processada tem seguido a Lei de Moore na década
 passada.
-Partly 
 
-Julia anceia criar uma combinação sem precedente de facilidade de uso, força e
+Julia anseia criar uma combinação sem precedente de facilidade de uso, força e
 eficiência em uma única linguagem. Em adição ao dito acima, algumas das
 vantagens de Julia em comparação com outros sistemas são:
 
@@ -109,7 +105,7 @@ vantagens de Julia em comparação com outros sistemas são:
    *API* especial)
 -  Capacidade semelhante a de uma poderosa *shell* para gerenciar outros
    processos
--  Macros de forma parecida a Lisp e outras facilidades de *metaprogramming*
+-  Macros de forma parecida a Lisp e outras facilidades de metaprogramação
 
 .. rubric:: Notas de rodapé
 
