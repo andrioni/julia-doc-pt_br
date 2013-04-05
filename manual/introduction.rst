@@ -1,108 +1,124 @@
 .. _man-introduction:
 
 **************
- Introduction  
+ Introdução    
 **************
 
-Scientific computing has traditionally required the highest performance,
-yet domain experts have largely moved to slower dynamic languages for
-daily work. We believe there are many good reasons to prefer dynamic
-languages for these applications, and we do not expect their use to
-diminish. Fortunately, modern language design and compiler techniques
-make it possible to mostly eliminate the performance trade-off and
-provide a single environment productive enough for prototyping and
-efficient enough for deploying performance-intensive applications. The
-Julia programming language fills this role: it is a flexible dynamic
-language, appropriate for scientific and numerical computing, with
-performance comparable to traditional statically-typed languages.
+Computação científica tem requerido, tradicionalmente, alta performace embora
+grandes nomes da área tenham passado a utilizar linguagems dinâmicas lentas
+para o trabalho diário. Acreditamos que existam várias boas razões para
+preferir utilizar linguagens dinâmicas em suas aplicações, e não esperamos
+desmerecer seu uso. Felizmente, as modernas técnicas para criação de linguagens
+e de compilação torna possível eliminar, quase totalmente, o problema de
+desempenho de linguagens dinâmicas e prover um ambiente produtivo para
+experimentação e eficiente para produção de aplicativos que precisam de alto
+desempenho. A linguagem de programação Julia preenche esse buraco: é uma
+linguagem dinâmica, apropriada para computação numérica e científica, com um
+desempenho comparável a linguagens estáticas tradicionalmente utilizadas.
+Scientific computing has traditionally required the highest performance
 
-Julia features optional typing, multiple dispatch, and good performance,
-achieved using type inference and `just-in-time (JIT)
-compilation <http://en.wikipedia.org/wiki/Just-in-time_compilation>`_,
-implemented using
-`LLVM <http://en.wikipedia.org/wiki/Low_Level_Virtual_Machine>`_. It is
-multi-paradigm, combining features of imperative, functional, and
-object-oriented programming. The syntax of Julia is similar to
-`MATLAB® <http://en.wikipedia.org/wiki/Matlab>`_ and consequently
-MATLAB programmers should feel immediately comfortable with Julia.
-While MATLAB is quite effective for prototyping and exploring numerical
-linear algebra, it has limitations for programming tasks outside of this
-relatively narrow scope. Julia keeps MATLAB's ease and expressiveness
-for high-level numerical computing, but transcends its general
-programming limitations. To achieve this, Julia builds upon the lineage
-of mathematical programming languages, but also borrows much from
-popular dynamic languages, including
+As características de Julia são fácil escrita, *multiple dispatch*, e bom
+desempenho, alcançado utilizando inferência de tipos e compilação
+*just-in-time* (JIT) [#JIT-en]_, [#JIT-pt]_,
+implementada utilizando
+*LLVM* [#LLVM-en]_, [#LLVM-pt]_. Ela é
+multi-paradigma, combinando características de programação imperativa,
+funcional e orientada a objetos. A sintaxe de Julia é similar a do `GNU Octave
+<http://en.wikipedia.org/wiki/GNU_Octave>`_ ou `MATLAB(R)
+<http://en.wikipedia.org/wiki/Matlab>`_ e consequentemente os programadores que
+que já utilizam estas linguagens devem sentir-se imediatamente confortáveis com
+Julia. Enquanto MATLAB(R) é um bem eficiente para experimentações e explorações
+de algebra linear numérica, possui limitações para tarefas computacionais fora
+deste campo relativamente pequeno. Julia mantem a facilidade e expressividade
+do MATLAB(R) para computação numérica de alto nível, mas ultrapassa as
+limitações comparadas a uma linguagem de programação de propósito geral. Para
+alcançar isso, Julia é construída com heranças das linguagens de programação
+matemática, mas também herda muito de outras linguagens dinâmicas populares,
+incluindo
 `Lisp <http://en.wikipedia.org/wiki/Lisp_(programming_language)>`_,
 `Perl <http://en.wikipedia.org/wiki/Perl_(programming_language)>`_,
 `Python <http://en.wikipedia.org/wiki/Python_(programming_language)>`_,
 `Lua <http://en.wikipedia.org/wiki/Lua_(programming_language)>`_, and
 `Ruby <http://en.wikipedia.org/wiki/Ruby_(programming_language)>`_.
 
-The most significant departures of Julia from typical dynamic languages
-are:
+As características mas significativas de Julia em relação a linguagens
+tipicamente dinâmica são:
 
--  The core language imposes very little; the standard library is
-   written in Julia itself, including primitive operations like integer
-   arithmetic
--  A rich language of types for constructing and describing objects,
-   that can also optionally be used to make type declarations
--  The ability to define function behavior across many combinations of
-   argument types via `multiple
-   dispatch <http://en.wikipedia.org/wiki/Multiple_dispatch>`_
--  Automatic generation of efficient, specialized code for different
-   argument types
--  Good performance, approaching that of statically-compiled languages
-   like C
+-  O Núcleo da linguagem impõe muito pouco; a biblioteca padrão é escrita
+   utilizando a própria linguagem Julia, incluindo operadores primitivos como
+   operações aritméticas de inteiros
+-  Uma grande variedades de tipos para construir e descrever objetos, que pode
+   também, opcionalmente, ser utilizado para fazer declarações de tipos
+-  A habilidade de definir o comportamento de funções com base na combinação de
+   vários tipos de argumentos via *multiple dispatch* [#MD-en]_, [#MD-pt]_
+-  Geração automática de código eficiente e especializado para diferentes tipos
+   de argumentos
+-  Bom desempenho, aproximando-se de linguagens estáticas e compiladas como C
 
-Although one sometimes speaks of dynamic languages as being "typeless",
-they are definitely not: every object, whether primitive or
-user-defined, has a type. The lack of type declarations in most dynamic
-languages, however, means that one cannot instruct the compiler about
-the types of values, and often cannot explicitly talk about types at
-all. In static languages, on the other hand, while one can — and usually
-must — annotate types for the compiler, types exist only at compile time
-and cannot be manipulated or expressed at run time. In Julia, types are
-themselves run-time objects, and can also be used to convey information
-to the compiler.
+Embora alguém alguma vez disse que linguagens dinâmicas não são tipadas,
+elas definitivamente são: todo objeto, seja primitivo ou definido pelo usuário,
+possui um tipo. A ausência na declaração do tipo na maioria das linguagens
+dinâmicas, entretanto, significa que não podemos instruir o compilador sobre o
+tipo dos valores, e comumente não podemos falar sobre tipos. Em linguagens
+estáticas, em oposição, enquanto podemos - e usualmente precisamos -
+especificar tipos para o compilador, tipos existem apenas em tempo de
+compilação e não podem ser manipulados ou expressos em tempo de execução. Em
+Julia, tipos são objetos em tempo de execução, e podem também ser utilizados
+para convenientemente informar o compilador.
+Although one sometimes speaks of dynamic la
 
-While the casual programmer need not explicitly use types or multiple
-dispatch, they are the core unifying features of Julia: functions are
-defined on different combinations of argument types, and applied by
-dispatching to the most specific matching definition. This model is a
-good fit for mathematical programming, where it is unnatural for the
-first argument to "own" an operation as in traditional object-oriented
-dispatch. Operators are just functions with special notation — to extend
-addition to new user-defined data types, you define new methods for the
-``+`` function. Existing code then seamlessly applies to the new data
-types.
+Embora o programador casual não precise explicitamente utilizar tipos ou
+*multiple dispatch*, estas são características principais de Julia: funções são
+definidas para diferentes combinações de tipos de argumentos, e utilizadas de
+acordo com as especificações mais semelhantes. Este modelo ser para programação
+matemáticas, onde não é natural o primeiro argumento "possuir" uma operação
+como é tradicional em linguagens orientadas a objetos. Operadores são apenas
+funções com uma função especial - para extender a adição para um novo tipo
+definido pelo usuário, você define um novo método para a função ``+``. Codes já
+existentes são aplicados para novos tipos sem problemas.
+While the casual programmer need not explicitly use typ
 
-Partly because of run-time type inference (augmented by optional type
-annotations), and partly because of a strong focus on performance from
-the inception of the project, Julia's computational efficiency exceeds
-that of other dynamic languages, and even rivals that of
-statically-compiled languages. For large scale numerical problems, speed
-always has been, continues to be, and probably always will be crucial:
-the amount of data being processed has easily kept pace with Moore's Law
-over the past decades.
+Parcialmente por causa da inferência de tipos em tempo de execução (aumentado
+pela opcionalidade da declaração de tipo), e parcialmente por causa do grande
+foco em desempenho existente no início do projeto, a eficiência computacional
+de Julia é maior que a de outras linguagens dinâmicas, e até rivaliza com
+linguagens estáticas e compiladas. Para problemas numéricos de larga escala,
+velocidade sempre foi, continua sendo, e provavelmente sempre será crucial: a
+quantidade de dados sendo processada tem seguido a Lei de Moore na década
+passada.
+Partly 
 
-Julia aims to create an unprecedented combination of ease-of-use, power,
-and efficiency in a single language. In addition to the above, some
-advantages of Julia over comparable systems include:
+Julia anceia criar uma combinação sem precedente de facilidade de uso, força e
+eficiência em uma única linguagem. Em adição ao dito acima, algumas das
+vantagens de Julia em comparação com outros sistemas são:
 
--  Free and open source (`MIT
-   licensed <https://github.com/JuliaLang/julia/blob/master/LICENSE>`_)
--  User-defined types are as fast and compact as built-ins
--  No need to vectorize code for performance; devectorized code is fast
--  Designed for parallelism and distributed computation
--  Lightweight "green" threading
-   (`coroutines <http://en.wikipedia.org/wiki/Coroutine>`_)
--  Unobtrusive yet powerful type system
--  Elegant and extensible conversions and promotions for numeric and
-   other types
--  Efficient support for
-   `Unicode <http://en.wikipedia.org/wiki/Unicode>`_, including but not
-   limited to `UTF-8 <http://en.wikipedia.org/wiki/UTF-8>`_
--  Call C functions directly (no wrappers or special APIs needed)
--  Powerful shell-like capabilities for managing other processes
--  Lisp-like macros and other metaprogramming facilities
+-  Livre e open source (`Licença MIT
+   <https://github.com/JuliaLang/julia/blob/master/LICENSE>`_)
+-  Tipos definidos pelo usuário são rápidos e compactos como tipos nativos
+-  Ausência da necessidade de vetorizar códigos por desempenho; códigos não
+   vetorizados são rápidos
+-  Projetado para computação paralela e distribuída
+-  *Lightweight "green" threading coroutines* [#COR-en]_, [#COR-pt]_
+-  Sistemas de tipos não obstrutivos mas poderoso
+-  Conversão e promoção de tipos numéricos e outros de forma elegante e
+   extensível
+-  Suporte eficiente para
+   `Unicode <http://en.wikipedia.org/wiki/Unicode>`_, incluindo mas não
+   limitado ao `UTF-8 <http://en.wikipedia.org/wiki/UTF-8>`_
+-  Chamadas de funções em C de forma direta (sem necessidade de *wrappers* ou
+   *API* especial)
+-  Capacidade semelhante a de uma poderosa *shell* para gerenciar outros
+   processos
+-  Macros de forma parecida a Lisp e outras facilidades de *metaprogramming*
+
+.. rubric:: Notas de rodapé
+
+.. [#JIT-en] http://en.wikipedia.org/wiki/Just-in-time_compilation
+.. [#JIT-pt] http://pt.wikipedia.org/wiki/JIT
+.. [#LLVM-en] http://en.wikipedia.org/wiki/Low_Level_Virtual_Machine
+.. [#LLVM-pt] http://pt.wikipedia.org/wiki/Low_Level_Virtual_Machine
+.. [#MD-en] http://en.wikipedia.org/wiki/Multiple_dispatch
+.. [#MD-pt] http://pt.wikipedia.org/wiki/Despacho_m%C3%BAltiplo
+.. [#COR-en] http://en.wikipedia.org/wiki/Coroutine
+.. [#COR-pt] http://pt.wikipedia.org/wiki/Corotina
 

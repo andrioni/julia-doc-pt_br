@@ -34,8 +34,39 @@ Estrutura dos arquivos
 README da tradução brasileira
 =============================
 
-A documentação de Julia é grande, e a tradução acaba de começar. Sendo assim,
-seria bom definir uma lista de traduções para termos comuns.
+Termos em língua extrangeira devem estar em itálico.
+
+Na documentação existem alguns links para a Wikipédia inglesa. Esses links
+devem ser mantidos e adicionados os correspondentes na Wikipédia portuguesa,
+preferencialmente na forma de notas de rodapé.
+
+Ao traduzir parte da documentação, preferencialmente utilize a lista, em ordem
+alfabética dos termos em inglês, a seguir para alguns termos técnicos que não
+possuem tradução para o português.
+
++--------------------------------------+--------------------------------------+
++ Inglês                               + Português                            +
++--------------------------------------+--------------------------------------+
++ API                                  + *API*                                +
++--------------------------------------+--------------------------------------+
++ features                             + características                      +
++--------------------------------------+--------------------------------------+
++ departures                           + características                      +
++--------------------------------------+--------------------------------------+
++ environment                          + ambiente                             +
++--------------------------------------+--------------------------------------+
++ just-in-time                         + *just-in-time*                       +
++--------------------------------------+--------------------------------------+
++ metaprogramming                      + *metaprogramming*                    +
++--------------------------------------+--------------------------------------+
++ multiple dispatch                    + *multiple dispatch*                  +
++--------------------------------------+--------------------------------------+
++ performance                          + desempenho                           +
++--------------------------------------+--------------------------------------+
++ prototyping                          + experimentação                       +
++--------------------------------------+--------------------------------------+
++ wrapper                              + *wrapper*                            +
++--------------------------------------+--------------------------------------+
 
 Julia Documentation README
 ==========================
