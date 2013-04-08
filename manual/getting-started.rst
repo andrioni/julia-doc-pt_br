@@ -186,7 +186,7 @@ vindos de R, estas são algumas diferenças importantes:
 - Julia does not ``NULL`` type.
 - There is no equivalent of R's ``assign`` or ``get`` in Julia.
 
-+
-+.. rubric:: Notas de rodapé
-+
-+.. [#REPL-en] http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop
+
+.. rubric:: Notas de rodapé
+
+.. [#REPL-en] http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop
