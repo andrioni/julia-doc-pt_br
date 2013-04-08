@@ -1,3 +1,4 @@
+A tradução para o português ainda está sendo feita! Entre na `página oficial no GitHub <https://github.com/andrioni/julia-doc-pt_br>`_ para nos ajudar!
 
 %%%%%%%%%%%%%%%%%%%%%%%
  Documentação de Julia
@@ -10,14 +11,13 @@
    stdlib/index
    packages/packagelist
 
-Traduções
-=========
-
-* `The Julia Manual (Chinese) <http://julia_zh_cn.readthedocs.org/en/latest/manual>`_
-
 Índices e tabelas
 =================
 
 * :ref:`genindex`
 * :ref:`search`
 
+Traduções
+=========
+
+* `The Julia Manual (简体中文) <http://julia_zh_cn.readthedocs.org/en/latest/manual>`_

@@ -1,8 +1,8 @@
 .. _available-packages:
 
-********************
- Available Packages  
-********************
+*********************************
+ Pacotes Disponíveis (em inglês)
+*********************************
 
 `ArgParse <https://github.com/carlobaldassi/ArgParse.jl>`_
 __________________________________________________________
