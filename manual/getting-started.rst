@@ -1,11 +1,18 @@
 .. _man-getting-started:
 
-*****************
- Getting Started  
-*****************
+***********
+ Começando  
+***********
+
+A instalação de Julia é direta, seja com binário pré-compilados, seja
+compilando o código-fonte. Faça download e instale Julia seguindo as 
+instruções (em inglês) em `http://julialang.org/downloads/ <http://julialang.org/downloads/>`_.
 
 Julia installation is straightforward, whether using precompiled binaries or compiling from source. Download and install Julia by following the instructions at
 `http://julialang.org/downloads/ <http://julialang.org/downloads/>`_.
+
+A maneira mais fácil de aprender e experimentar com Julia é iniciando 
+sessão interativa (também conhecida como *read-eval-print loop* ou *"repl"*)::
 
 The easiest way to learn and experiment with Julia is by starting an
 interactive session (also known as a read-eval-print loop or "repl")::
@@ -26,6 +33,16 @@ interactive session (also known as a read-eval-print loop or "repl")::
     julia> ans
     3
 
+Para encerrar a sessão interative, digite ``^D```- a tecla *Ctrl* 
+junto da tecla ``d`` ou digite ``quit()``. Quando rodado no modo 
+interativo, ``julia`` mostra um banner e espera o usuário digitar.
+Uma vez que o usuário digitou uma expressão completa, como `1 + 2`, e
+apertou *enter*, a sessão interativa calcula a expressão e mostra o 
+seu valor. Se uma expressão é inserida em uma sessão interativa com um
+ponto-e-vírgula no final, seu valor não é mostrado. À variável ``ans``
+é atribuído o valor da última expressão calculada, tendo sido mostrada
+ou não.
+
 To exit the interactive session, type ``^D`` — the control key
 together with the ``d`` key or type ``quit()``. When run in interactive
 mode, ``julia`` displays a banner and prompts the user for input. Once
@@ -36,13 +53,26 @@ with a trailing semicolon, its value is not shown. The variable
 ``ans`` is bound to the value of the last evaluated expression whether
 it is shown or not.
 
+Para calcular expressões escritas em um arquivo ``file.jl``, digite
+``include("file.jl")``.
+
 To evaluate expressions written in a source file ``file.jl``, write
 ``include("file.jl")``.
+
+Para rodar código em um arquivo de maneira não-interativa, você pode
+usá-lo como o primeiro argumento no comando julia::
 
 To run code in a file non-interactively, you can give it as the first
 argument to the julia command::
 
     $ julia script.jl arg1 arg2...
+
+Como mostra o exemplo, os argumentos da linha de comando subsequentes
+são tomados como argumentos para o programa ``script.jl``, passados na
+constante global ``ARGS``. ``ARGS`` é também definida quando o código
+do *script* é dado usando a opção da linha de comando ``-e`` (veja a saída de 
+ajuda de ``julia`` abaixo). Por exemplo, para só imprimir os argumentos
+dados a um *script*, você pode fazer::
 
 As the example implies, the following command-line arguments to julia
 are taken as command-line arguments to the program ``script.jl``, passed
@@ -55,12 +85,17 @@ script, you could do this::
     foo
     bar
 
+Ou pode colocar esse código em um *script* e rodá-lo::
+
 Or you could put that code into a script and run it::
 
     $ echo 'for x in ARGS; println(x); end' > script.jl
     $ julia script.jl foo bar
     foo
     bar
+
+Há várias maneiras de rodar código em Julia e dar opções, semelhantes
+àquelas disponívels para os programas ``perl`` e ``ruby``:
 
 There are various ways to run Julia code and provide options, similar to
 those available for the ``perl`` and ``ruby`` programs::
@@ -86,21 +121,77 @@ those available for the ``perl`` and ``ruby`` programs::
 
      -h --help                Print this message
 
-Tutorials
+
+Tutoriais
 ---------
+
+Alguns guias passo-a-passo estão disponíveis online:
 
 A few walkthrough-style tutorials are available online:
 
-- `Forio Julia Tutorials <http://forio.com/julia/tutorials-list>`_
-- `Tutorial for Homer Reid's numerical analysis class <http://homerreid.ath.cx/teaching/18.330/JuliaProgramming.shtml#SimplePrograms>`_
+- `Começando com Julia para usuários de MATLAB <http://www.ime.unicamp.br/~ra092767/tutoriais/julia/>`_
+- `Forio Julia Tutorials (em inglês) <http://forio.com/julia/tutorials-list>`_
+- `Tutorial for Homer Reid's numerical analysis class (em inglês) <http://homerreid.ath.cx/teaching/18.330/JuliaProgramming.shtml#SimplePrograms>`_
 
-Noteworthy differences from MATLAB
-----------------------------------
+Diferenças nótáveis em relação ao MATLAB
+----------------------------------------
+
+Usuários de MATLAB podem achar a sintaxe de Julia familar, porém Julia
+não é de maneira alguma um clone de MATLAB: há grandes diferenças
+sintáticas e funcionais. Apresentadas a seguir estão algumas 
+importantes ressalvas que podem confundir usuários de Julia 
+acostumados com MATLAB:
 
 MATLAB users may find Julia's syntax familiar. However,
 Julia is in no way a MATLAB clone: there are major syntactic and
 functional differences. The following are some noteworthy
 differences that may trip up Julia users accustomed to MATLAB:
+
+-  *Arrays* são indexados com colchetes, ``A[i,j]``.
+-  A unidade imaginária ``sqrt(-1)`` é representada em Julia com 
+   ``im``.
+-  Múltiplos valores são retornados e atribuídos com parênteses,
+   ``return (a, b)`` e ``(a, b) = f(x)``.
+-  Valores são passados e atribuídos por referência. Se uma função 
+   modifica um *array*, as mudanças serão visíveis para quem chamou.
+-  Julia tem *arrays* unidimensionais. Vetores-coluna são de tamanho 
+   ``N``, não ``Nx1``. Por exemplo, ``rand(N)`` cria um array 
+   unidimensional.
+-  Concatenar escalares e *arrays* com a sintaxe ``[x,y,z]`` concatena
+   na primeira dimensão ("verticalmente"). Para a segunda dimensão,
+   ("horizontalmente"), use espaços, como em ``[x y z]``. Para 
+   construir matrizes em blocos (concatenando nas duas primeiras 
+   dimensões), é usada a sintaxe ``[a b; c d]`` para evitar confusão.
+-  Dois-pontos ``a:b`` e ``a:b:c`` constroem objetos ``Range``. Para 
+   construir um vetor completo, use ``linspace``, ou "concatene" o
+   intervalo colocando-o em colchetes, ``[a:b]``.
+-  Funções retornam valores usando a palavra-chave ``return``, ao 
+   invés de por citações a seus nomes na definição da função (veja
+   :ref:`man-return-keyword` para mais detalhes).
+-  Um arquivo pode conter um número qualquer de funções, e todas as 
+   definições vão ser visíveis de fora quando o arquivo for carregado.
+-  Reduções como ``sum``, ``prod``, e ``max`` são feitas sobre cada 
+   elemento de um *array* quando chamadas com um único argumento, como
+   em ``sum(A)``.
+-  Funções como ``sort`` que operam por padrão em colunas
+   (``sort(A)`` é equivalente a ``sort(A,1)``) não possuem 
+   comportamento especial para *arrays* 1xN; o argumento é retornado
+   inalterado, já que a operação feita foi ``sort(A,1)``. Para ordenar
+   uma matriz 1xN como um vetor, use ``sort(A,2)``.
+-  Parênteses devem ser usados para chamar uma função com zero 
+   argumentos, como em``tic()`` and ``toc()``.
+-  Não use ponto-e-vírgula para encerrar declarações. Os resultados 
+   de declarações não são automaticamente impressos (exceto no prompt 
+   interativo), e linhas de código não precisam terminar com 
+   ponto-e-vírgula. A função ``println`` pode ser usada para imprimir 
+   um valor seguido de uma nova linha.
+-  Se ``A`` e ``B`` são *arrays*, ``A == B`` não retorna um *array* de
+   booleanos. Use ``A .== B`` no lugar. O mesmo vale para outros 
+   operaores booleanos, ``<``, ``>``, ``!=``, etc.
+-  Os elementos de uma coleção podem ser passados como argumentos para
+   uma função usando ``...``, como em ``xs=[1,2]; f(xs...)``.
+-  A função ``svd`` de Julia retorna os valores singulares como um
+   vetor, e não como uma matriz diagonal.
 
 -  Arrays are indexed with square brackets, ``A[i,j]``.
 -  The imaginary unit ``sqrt(-1)`` is represented in julia with ``im``.
