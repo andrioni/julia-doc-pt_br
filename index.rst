@@ -1,4 +1,3 @@
-A tradução para o português ainda está sendo feita! Entre na `página oficial no GitHub <https://github.com/andrioni/julia-doc-pt_br>`_ para nos ajudar!
 
 %%%%%%%%%%%%%%%%%%%%%%%
  Documentação de Julia
