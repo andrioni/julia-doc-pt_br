@@ -1,56 +1,60 @@
 .. _man-integers-and-floating-point-numbers:
 
-*************************************
- Integers and Floating-Point Numbers  
-*************************************
+***************************************
+ Números Inteiros e de Ponto Flutuante  
+***************************************
 
-Integers and floating-point values are the basic building blocks of
-arithmetic and computation. Built-in representations of such values are
-called numeric primitives, while representations of integers and
-floating-point numbers as immediate values in code are known as numeric
-literals. For example, ``1`` is an integer literal, while ``1.0`` is a
-floating-point literal; their binary in-memory representations as
-objects are numeric primitives. Julia provides a broad range of
-primitive numeric types, and a full complement of arithmetic and bitwise
-operators as well as standard mathematical functions are defined over
-them. The following are Julia's primitive numeric types:
+Valores inteiros e de ponto flutuante são as fundações da aritmética
+e computação. Representações embutidas de tais valores são chamadas
+de primitivas numérica, enquanto representações de inteiros e
+de números de ponto flutuante como valores imediatos no código 
+são conhecidas como literais numéricos. Por exemplo, ``1`` é um 
+literal numérico, enquanto ``1.0`` é um literal de ponto flutuante;
+suas representações binárias na memória como objetos são primitivas
+numéricas. Julia provê uma grande amplitude de tipos primitivos
+numéricos, e um conjunto completo de operadores aritméticos e bit a 
+bit, e também funções matemáticas padrões, são definidas sobre eles.
+A seguir são apresentados os tipos numéricos primitvos de Julia: 
 
--  **Integer types:**
+-  **Tipos de inteiros:**
 
-   -  ``Int8`` — signed 8-bit integers ranging from -2^7 to 2^7 - 1.
-   -  ``Uint8`` — unsigned 8-bit integers ranging from 0 to 2^8 - 1.
-   -  ``Int16`` — signed 16-bit integers ranging from -2^15 to 2^15 - 1.
-   -  ``Uint16`` — unsigned 16-bit integers ranging from 0 to 2^16 - 1.
-   -  ``Int32`` — signed 32-bit integers ranging from -2^31 to 2^31 - 1.
-   -  ``Uint32`` — unsigned 32-bit integers ranging from 0 to 2^32 - 1.
-   -  ``Int64`` — signed 64-bit integers ranging from -2^63 to 2^63 - 1.
-   -  ``Uint64`` — unsigned 64-bit integers ranging from 0 to 2^64 - 1.
-   -  ``Int128`` - signed 128-bit integers ranging from -2^127 to 2^127 - 1.
-   -  ``Uint128`` - unsigned 128-bit integers ranging from 0 to 2^128 - 1.
-   -  ``Bool`` — either ``true`` or ``false``, which correspond
-      numerically to 1 and 0.
-   -  ``Char`` — a 32-bit numeric type representing a `Unicode
-      character <http://en.wikipedia.org/wiki/Unicode>`_ (see
-      :ref:`man-strings` for more details).
+   -  ``Int8`` — inteiros 8-bit com sinal variando de -2^7 a 2^7 - 1.
+   -  ``Int8`` — inteiros 8-bit sem sinal variando de 0 a 2^8 - 1.
+   -  ``Int16`` — inteiros 16-bit com sinal variando de -2^15 a 2^15 - 1.
+   -  ``Int16`` — inteiros 16-bit sem sinal variando de 0 a 2^16 - 1.
+   -  ``Int32`` — inteiros 32-bit com sinal variando de -2^31 a 2^31 - 1.
+   -  ``Int32`` — inteiros 32-bit sem sinal variando de 0 a 2^32 - 1.
+   -  ``Int64`` — inteiros 64-bit com sinal variando de -2^63 a 2^63 - 1.
+   -  ``Int64`` — inteiros 64-bit sem sinal variando de 0 a 2^64 - 1.
+   -  ``Int128`` — inteiros 128-bit com sinal variando de -2^127 a 2^127 - 1.
+   -  ``Int128`` — inteiros 128-bit sem sinal variando de 0 a 2^128 - 1.
+   -  ``Bool`` — valendo ou ``true`` (verdadeiro) ou ``false`` (falso),
+      que correspondem numericamente a 1 ou 0, respectivamente.
+   -  ``Char`` — um tipo numérico de 32 bits representando um `caracter
+      Unicode <http://en.wikipedia.org/wiki/Unicode>`_ (veja
+      :ref:`man-strings` para mais detalhes).
 
--  **Floating-point types:**
+-  **Tipos de ponto flutuante:**
 
-   -  ``Float32`` — `IEEE 754 32-bit floating-point
-      numbers <http://en.wikipedia.org/wiki/Single_precision_floating-point_format>`_.
-   -  ``Float64`` — `IEEE 754 64-bit floating-point
-      numbers <http://en.wikipedia.org/wiki/Double_precision_floating-point_format>`_.
+   -  ``Float32`` — `Números de ponto flutuante 32-bit seguindo o padrão
+      IEEE 754
+      <http://en.wikipedia.org/wiki/Single_precision_floating-point_format>`_.
+   -  ``Float64`` — `Números de ponto flutuante 64-bit seguindo o padrão 
+      IEEE 754 <http://en.wikipedia.org/wiki/Double_precision_floating-point_format>`_.
 
-Additionally, full support for :ref:`man-complex-and-rational-numbers` is built on top of these
-primitive numeric types. All numeric types interoperate naturally
-without explicit casting, thanks to a flexible type promotion system.
-Moreover, this promotion system, detailed in :ref:`man-conversion-and-promotion`, is user-extensible, so
-user-defined numeric types can be made to interoperate just as naturally
-as built-in types.
 
-Integers
+Adicionalmente, estruturas para :ref:`man-complex-and-rational-numbers` 
+são construídas sobre esses tipos numéricos primitivos. Todos os tipos
+numéricos interoperam naturalmente sem conversão de tipos explícita, 
+graças a um sistem flexível de promoção de tipos. Esse sistema, 
+detalhado em :ref:`man-conversion-and-promotion`, pode ser estendido,
+possibilitando que tipos numéricos definidos pelos usuários possam 
+interoperar tão naturalmente quanto os tipos embutidos.
+
+Inteiros
 --------
 
-Literal integers are represented in the standard manner::
+Literais inteiros são representados da maneira padrão::
 
     julia> 1
     1
@@ -58,51 +62,51 @@ Literal integers are represented in the standard manner::
     julia> 1234
     1234
 
-The default type for an integer literal depends on whether the target
-system has a 32-bit architecture or a 64-bit architecture::
+O tipo padrão para um literal inteiro depende do sistema, isto é, se 
+ele usa uma arquitetura de 32 bits ou de 64 bits::
 
-    # 32-bit system:
+    # sistema 32-bit:
     julia> typeof(1)
     Int32
 
-    # 64-bit system:
+    # sistema 64-bit:
     julia> typeof(1)
     Int64
 
-Use ``WORD_SIZE`` to figure out whether the target system is 32-bit
-or 64-bit. The type ``Int`` is an alias for the system-native integer type::
+Use ``WORD_SIZE`` para descobrir se um sistema é de 32 ou 64 bits.
+O tipo ``Int`` é um *alias* para o tipo inteiro nativo do sistema::
 
-    # 32-bit system:
+    # sistema 32-bit:
     julia> Int
     Int32
 
-    # 64-bit system:
+    # sistema 64-bit:
     julia> Int
     Int64
 
-Similarly, ``Uint`` is an alias for the system-native unsigned integer
-type::
+Similarmente, ``Uint`` é um *alias* para o tipo inteiro sem sinal 
+nativo do sistema::
 
-    # 32-bit system:
+    # sistema 32-bit:
     julia> Uint
     Uint32
 
-    # 64-bit system:
+    # sistema 64-bit:
     julia> Uint
     Uint64
 
-Larger integer literals that cannot be represented using only 32 bits
-but can be represented in 64 bits always create 64-bit integers,
-regardless of the system type::
+Literais inteiros que não conseguem ser representados usando somente 32
+bits, mas podem ser representados com 64 bits sempre criam inteiros de
+64 bits, independentemente do tipo de sistema::
 
-    # 32-bit or 64-bit system:
+    # sistema 32-bit ou 64-bit:
     julia> typeof(3000000000)
     Int64
 
-Unsigned integers are input and output using the ``0x`` prefix and
-hexadecimal (base 16) digits ``0-9a-f`` (you can also use ``A-F`` for
-input). The size of the unsigned value is determined by the number of
-hex digits used::
+Inteiros sem sinal são inseridos e imprimidos usando o prefixo ``0x``
+e com dígitos hexadecimais (base 16) ``0-9a-f`` (você também pode usar
+``A-F`` para a inserção). O tamanho do valores sem sinal é determinado
+pelo número de dígitos hexadecimais utilizados::
 
     julia> 0x1
     0x01
@@ -128,12 +132,12 @@ hex digits used::
     julia> typeof(ans)
     Uint64
 
-This behavior is based on the observation that when one uses unsigned
-hex literals for integer values, one typically is using them to
-represent a fixed numeric byte sequence, rather than just an integer
-value.
+Esse comportamento é basedo na observação de que quando uma pessoa usa
+literais hexadecimais para valores inteiros, ela tipicamente os usa 
+para representar uma sequência de bytes fixa ao invés de apenas um
+valor inteiro.
 
-Binary and octal literals are also supported::
+Literais binários e octais também são suportados::
 
     julia> 0b10
     0x02
@@ -141,8 +145,9 @@ Binary and octal literals are also supported::
     julia> 0o10
     0x08
 
-The minimum and maximum representable values of primitive numeric types
-such as integers are given by the ``typemin`` and ``typemax`` functions::
+Os valores mínimos e máximos representáveis dos tipos numéricos 
+primitivos (por exemplo, inteiros) são dados pelas funções ``typemin``
+(valor mínimo) e ``typemax`` (valor máximo)::
 
     julia> (typemin(Int32), typemax(Int32))
     (-2147483648,2147483647)
@@ -162,16 +167,17 @@ such as integers are given by the ``typemin`` and ``typemax`` functions::
      Uint64: [0x0000000000000000,0xffffffffffffffff]
     Uint128: [0x00000000000000000000000000000000,0xffffffffffffffffffffffffffffffff]
 
-The values returned by ``typemin`` and ``typemax`` are always of the
-given argument type. The above expression uses several features we have
-yet to introduce, including :ref:`for loops <man-loops>`,
-:ref:`man-strings`, and :ref:`man-string-interpolation`,
-but should be easy enough to understand for people with some programming experience.
+Os valores retornados por ``typemin`` e ``typemax`` são sempre do mesmo
+tipo dos argumentos dados. A expressão acima usa várias características
+que ainda introduziremos, incluindo :ref:`loops for <man-loops>`,
+:ref:`man-strings`, and :ref:`man-string-interpolation`, mas deve ser
+fácil de entender para alguém com alguma experiência em programação.
 
-Floating-Point Numbers
-----------------------
+Números de Ponto Flutuante
+--------------------------
 
-Literal floating-point numbers are represented in the standard formats::
+Números literais de ponto flutuante são representados nos seguintes
+formatos padrões::
 
     julia> 1.0
     1.0

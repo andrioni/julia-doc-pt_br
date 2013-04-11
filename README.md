@@ -50,6 +50,7 @@ possuem tradução para o português.
 | string                               | *string*                             |
 | typing                               | tipagem                              |
 | tuple                                | enupla (ou tupla?)                   |
+| for loops                            | loops for                            |
 | hash table                           | tabela de espalhamento (ou manter hash table?)  |
 
 README da Documentação de Julia

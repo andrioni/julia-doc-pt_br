@@ -5,8 +5,9 @@
  O Manual de Julia
 ###################
 
-:Release: |version|
-:Date: |today|
+:Versão: |version|
+:Data: |today|
+:Versão do original: 5 de Abril, 2013
 
 .. toctree::
    :maxdepth: 1
