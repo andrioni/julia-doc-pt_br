@@ -1,96 +1,91 @@
 .. _man-functions:
 
 ***********
- Functions  
+ Funções  
 ***********
 
-In Julia, a function is an object that maps a tuple of argument values
-to a return value. Julia functions are not pure mathematical functions,
-in the sense that functions can alter and be affected by the global
-state of the program. The basic syntax for defining functions in Julia
-is::
+Em Julia, uma função é um objeto que mapeia uma tupla de valores, os
+argumentos, a um valor de retorno. As funções, em Julia, são diferentes das
+funções matemáticas, pois as funções podem se alterar e afetadas pelo estado
+global do programa. A sintaxe básica para definir uma funções em Julia é::
 
     function f(x,y)
       x + y
     end
 
-This syntax is similar to MATLAB, but there are some significant
-differences:
+Esta sintaxe é similar a do MATLAB, mas há algumas diferenças significativas:
 
--  In MATLAB, this definition must be saved in a file, named ``f.m``,
-   whereas in Julia, this expression can appear anywhere, including in
-   an interactive session.
--  In MATLAB, the closing ``end`` is optional, being implied by the end
-   of the file. In Julia, the terminating ``end`` is required.
--  In MATLAB, this function would print the value ``x + y`` but would
-   not return any value, whereas in Julia, the last expression evaluated
-   is a function's return value.
--  Expression values are never printed automatically except in
-   interactive sessions. Semicolons are only required to separate
-   expressions on the same line.
+- No MATLAB, esta definição deve ser salvar em um arquivo, nomeado ``f.m``,
+  enquanto que que em Julia, esta declaração pode aparecer em qualquer lugar,
+  incluindo em uma sessão interativa.
+- No MATLAB, a declaração ``end`` final é opcional, sendo implicado pelo fim do
+  arquivo. Em Julia, essa declaração ``end`` é obrigatória.
+- No MATLAB, esta função irá imprimir o valor ``x + y`` mas não retornará
+  nenhum valor, enquanto que em Julia, a última expressão avaliada é o valor de
+  retorno da função.
+- Os valores de uma expressão nunca são mostrados automaticamente exceto em
+  sessões interativas. Ponto-e-vírgula são exigidos somente para separar
+  expressões na mesma linha.
 
-In general, while the function definition syntax is reminiscent of
-MATLAB, the similarity is largely superficial. Therefore, rather than
-continually comparing the two, in what follows, we will simply describe
-the behavior of functions in Julia directly.
+Geralmente, enquanto a sintaxe da definição de função é remanescente do MATLAB,
+a similaridade é apenas superficial. Logo, ao invés de continuar comparando as
+duas, a seguir, nós simplesmente descreveremos o comportamento das funções em
+Julia.
 
-There is a second, more terse syntax for defining a function in Julia.
-The traditional function declaration syntax demonstrated above is
-equivalent to the following compact "assignment form"::
+Existe uma forma mais compacta de definir uma função em Julia.  A sintaxe
+tradicional de declaração de função apresentada acima é equivalente a forma
+compactada a seguir::
 
     f(x,y) = x + y
 
-In the assignment form, the body of the function must be a single
-expression, although it can be a compound expression (see
-:ref:`man-compound-expressions`). Short, simple
-function definitions are common in Julia. The short function syntax is
-accordingly quite idiomatic, considerably reducing both typing and
-visual noise.
+Nessa forma compacta, o corpo da função deve ser uma única expressão, embora
+possa ser uma expressão composta (veja :ref:`man-compound-expressions`).
+Definições de funções de forma curta e simples são comuns em Julia. A sintaxe
+curta da função é bastante idiomática, reduzindo consideravelmente a digitação
+e a poluição visual.
 
-A function is called using the traditional parenthesis syntax::
+Uma função é chamada usando a sintaxe tradicional de parêntese::
 
     julia> f(2,3)
     5
 
-Without parentheses, the expression ``f`` refers to the function object,
-and can be passed around like any value::
+Sem parênteses, a expressão ``f`` refere-se ao objeto da função, e pode ser
+passada como qualquer valor::
 
     julia> g = f;
 
     julia> g(2,3)
     5
 
-There are two other ways that functions can be applied: using special
-operator syntax for certain function names (see `Operators Are
-Functions <#operators-are-functions>`_ below), or with the ``apply``
-function::
+Há outras duas maneiras que as funções podem ser aplicadas: usando operadores
+com sintaxe especial para certos nomes de funções (veja `Operadores são Funções
+<#operators-are-functions>`_), ou com a função ``apply``::
 
     julia> apply(f,2,3)
     5
 
-The ``apply`` function applies its first argument — a function object —
-to its remaining arguments.
+A função ``apply`` aplicam seu primeiro argumento - um objeto de função - a
+seus argumentos restantes.
 
 .. _man-return-keyword:
 
-The "return" Keyword
---------------------
+A declaração "return"
+---------------------
 
-The value returned by a function is the value of the last expression
-evaluated, which, by default, is the last expression in the body of the
-function definition. In the example function, ``f``, from the previous
-section this is the value of the expression ``x + y``. As in C and most
-other imperative or functional languages, the ``return`` keyword causes
-a function to return immediately, providing an expression whose value is
-returned::
+O valor retornado por uma função é o valor da última expressão avaliada, que,
+por padrão é a última expressão no corpo da definição da função. Na função de
+exemplo, ``f ``, da seção anterior isto é o valor da expressão ``x + y``.
+Como em C e na maioria das outras línguas imperativas ou funcionais, a
+declaração ``return`` faz com que uma função retorne imediatamente,
+fornecendo uma expressão cujo o valor será retornado::
 
     function g(x,y)
       return x * y
       x + y
     end
 
-Since functions definitions can be entered into interactive sessions, it
-is easy to compare these definitions::
+Como definições de funções podem ser feitas em sessões interativas, é fácil
+comparar estas definições::
 
     f(x,y) = x + y
 
@@ -105,13 +100,13 @@ is easy to compare these definitions::
     julia> g(2,3)
     6
 
-Of course, in a purely linear function body like ``g``, the usage of
-``return`` is pointless since the expression ``x + y`` is never
-evaluated and we could simply make ``x * y`` the last expression in the
-function and omit the ``return``. In conjunction with other control
-flow, however, ``return`` is of real use. Here, for example, is a
-function that computes the hypotenuse length of a right triangle with
-sides of length *x* and *y*, avoiding overflow::
+Naturalmente, em uma função cujo corpo é linear como ``g``, o uso do ``return``
+é injustificado pois a expressão ``x + y`` nunca é avaliada e nós poderíamos
+simplesmente tornar ``x * y`` a última expressão na função e omitir ``return``.
+Já em conjunto com outras declarações de controle deo fluxo, contudo, o
+``return`` é do uso real. A seguir, por exemplo, está uma funciona que calcula
+o comprimento da hipotenusa de um triângulo retângulo com lados de comprimento
+*x* e *y*, evitando *overflow*::
 
     function hypot(x,y)
       x = abs(x)
@@ -127,21 +122,20 @@ sides of length *x* and *y*, avoiding overflow::
       return y*sqrt(1+r*r)
     end
 
-There are three possible points of return from this function, returning
-the values of three different expressions, depending on the values of
-*x* and *y*. The ``return`` on the last line could be omitted since it
-is the last expression.
+Há três possíveis pontos de retorno nesta função, retornando os valores de três
+expressões diferentes, dependendo dos valores de *x* e *y*. O ``return`` na
+última linha podia ser omitido pois ele é o último expressão.
 
-Operators Are Functions
------------------------
+Operadores são funções
+----------------------
 
-In Julia, most operators are just functions with support for special
-syntax. The exceptions are operators with special evaluation semantics
-like ``&&`` and ``||``. These operators cannot be functions since
-short-circuit evaluation (see :ref:`man-short-circuit-evaluation`) requires that
-their operands are not evaluated before evaluation of the operator.
-Accordingly, you can also apply them using parenthesized argument lists,
-just as you would any other function::
+Em Julia, a maioria dos operadores são apenas funções com suport para sintaxe
+especial. As exceções são operadores com semântica especial como o ``&&`` e
+``||``. Estes operadores não podem ser funções pois o *short-circuit
+evaluation* (veja :ref:`man-short-circuit-evaluation`) exige que seus operandos
+não sejam avaliados antes da avaliação do operador.  Logo, você também pode
+aplicá-los usam uma lista de argumento entre parênteses, de forma semelhante
+como qualquer outra função::
 
     julia> 1 + 2 + 3
     6
@@ -149,18 +143,17 @@ just as you would any other function::
     julia> +(1,2,3)
     6
 
-The infix form is exactly equivalent to the function application form —
-in fact the former is parsed to produce the function call internally.
-This also means that you can assign and pass around operators such as
-``+`` and ``*`` just like you would with other function values::
+A forma infixa é exatamente equivalente a forma padrão - na verdade a primeira
+forma é convertida para uma chamada de função internamente.  Isto significa que
+você também pode atribuir e passar operadores como ``+`` e ``*`` da mesma forma
+como você faria para outra função::
 
     julia> f = +;
 
     julia> f(1,2,3)
     6
 
-Under the name ``f``, the function does not support infix notation,
-however.
+Sob o nome ``f ``, a função suporta a forma infixa.
 
 .. _man-anonymous-functions:
 
