@@ -74,7 +74,7 @@ A declaração "return"
 
 O valor retornado por uma função é o valor da última expressão avaliada, que,
 por padrão é a última expressão no corpo da definição da função. Na função de
-exemplo, ``f ``, da seção anterior isto é o valor da expressão ``x + y``.
+exemplo, ``f``, da seção anterior isto é o valor da expressão ``x + y``.
 Como em C e na maioria das outras línguas imperativas ou funcionais, a
 declaração ``return`` faz com que uma função retorne imediatamente,
 fornecendo uma expressão cujo o valor será retornado::
@@ -153,40 +153,39 @@ como você faria para outra função::
     julia> f(1,2,3)
     6
 
-Sob o nome ``f ``, a função suporta a forma infixa.
+Sob o nome ``f``, a função suporta a forma infixa.
 
 .. _man-anonymous-functions:
 
-Anonymous Functions
--------------------
+Funções Anónimas
+----------------
 
-Functions in Julia are first-class objects: they can be assigned to
-variables, called using the standard function call syntax from the
-variable they have been assigned to. They can be used as arguments, and
-they can be returned as values. They can also be created anonymously,
-without giving them a name::
+Funções em Julia são objetos de primeira classe: podem ser atribuídos a
+variáveis, chamadas usando a sintaxe padrão para chamada de função a partir da
+variável que foram atribuídas. Podem ser usadas como argumentos, e podem ser
+retornadas como valores. Também pode ser criadas anonimamente, sem ter um
+nome::
 
     julia> x -> x^2 + 2x - 1
     #<function>
 
-This creates an unnamed function taking one argument and returning the
-value of the polynomial *x*\ ^2 + 2\ *x* - 1 at that value. The primary
-use for anonymous functions is passing them to functions which take
-other functions as arguments. A classic example is the ``map`` function,
-which applies a function to each value of an array and returns a new
-array containing the resulting values::
+Isto cria uma função sem nome que possue um argumento e que retorna o valor do
+polinômio *x* \ ^2 + 2 \ *x* - 1.  O uso principal para funções anónimas é
+serem passadas para funções que recebem outras funções como argumentos. Um
+exemplo clássico é a função do ``map``, que aplica uma função a cada valor de
+um vetor e retorna um novo vetor que contem os valores resultantes::
 
-    julia> map(round, [1.2,3.5,1.7])
+    julia> map(round, [1.2, 3.5, 1.7])
     3-element Float64 Array:
      1.0
      4.0
      2.0
 
-This is fine if a named function effecting the transform one wants
-already exists to pass as the first argument to ``map``. Often, however,
-a ready-to-use, named function does not exist. In these situations, the
-anonymous function construct allows easy creation of a single-use
-function object without needing a name::
+Não existe problema se uma função, já nomeada, que efetua a transformação
+desejada já existe para ser passada como o primeiro argumento da função
+``map``. Entretanto, frequentemente, não existe a função desejada pronta para
+uso.  Nestas situações, a função anónima permite a criação de um objeto função
+para um único uso sem precisar atribuir um nome::
 
     julia> map(x -> x^2 + 2x - 1, [1,3,-1])
     3-element Int64 Array:
@@ -194,35 +193,34 @@ function object without needing a name::
      14
      -2
 
-An anonymous function accepting multiple arguments can be written using
-the syntax ``(x,y,z)->2x+y-z``. A zero-argument anonymous function is
-written as ``()->3``. The idea of a function with no arguments may seem
-strange, but is useful for "delaying" a computation. In this usage, a
-block of code is wrapped in a zero-argument function, which is later
-invoked by calling it as ``f()``.
+Uma função anónima que aceita mais de um argumentos pode ser escrita usando a
+sintaxe ``(x,y,z)->2x+y-z``. Uma função anónima sem argumento é escrita como
+``()->3``. A ideia de uma função sem argumentos pode parecer estranha, mas é
+útil para "atrasar" algum cálculo.  Neste uso, um bloco de código é envolvido
+em uma função sem argumento, que é posteriormente invocada chamando ``f()``.
 
-Multiple Return Values
-----------------------
+Retornando mais de um valor
+---------------------------
 
-In Julia, one returns a tuple of values to simulate returning multiple
-values. However, tuples can be created and destructured without needing
-parentheses, thereby providing an illusion that multiple values are
-being returned, rather than a single tuple value. For example, the
-following function returns a pair of values::
+Em Julia, uma tupla deve ser retornada para simular o retorno de mais de um
+valor. Contudo, os tuplas podem ser criadas e destruidas sem precisar de
+parênteses, fornecendo a ilusão de que mais de um valor esta sendo retornado,
+ao invés de uma única tuple.  Por exemplo, a função a seguir retorna um par de
+valores::
 
     function foo(a,b)
       a+b, a*b
     end
 
-If you call it in an interactive session without assigning the return
-value anywhere, you will see the tuple returned::
+Se você chama essa função em uma sessão interativa sem atribuir o valor de
+retorno em nenhum lugar, você verá a tupla sendo retornada::
 
     julia> foo(2,3)
     (5,6)
 
-A typical usage of such a pair of return values, however, extracts each
-value into a variable. Julia supports simple tuple "destructuring" that
-facilitates this::
+Um uso típico de funções que retornam mais de um valor, contudo, extrai cada
+valor em uma variável.  Julia suporta a "destruição" simplificada de tuplas que
+facilitam isto::
 
     julia> x, y = foo(2,3);
 
@@ -232,29 +230,29 @@ facilitates this::
     julia> y
     6
 
-You can also return multiple values via an explicit usage of the
-``return`` keyword::
+Você também pode retornar mais de um valores através do uso explícito da
+expressão``return``::
 
     function foo(a,b)
       return a+b, a*b
     end
 
-This has the exact same effect as the previous definition of ``foo``.
+Isto tem exatamente mesmo efeito que a definição anterior de ``foo``.
 
-Varargs Functions
------------------
+Funções com Número Variado de Argumentos
+----------------------------------------
 
-It is often convenient to be able to write functions taking an arbitrary
-number of arguments. Such functions are traditionally known as "varargs"
-functions, which is short for "variable number of arguments". You can
-define a varargs function by following the last argument with an
-ellipsis::
+Frequentemente, é conveniente poder escrever funções que tomam um número
+arbitrário de argumentos. Tais funções são tradicional conhecidas como funções
+*varargs*, que um acrônimo para "variable number of arguments" (ou "número
+variável de argumentos", em tradução literal). Você pode definir uma função
+*varargs* utilizando depois do último argumento uma elipse (``...``)::
 
     bar(a,b,x...) = (a,b,x)
 
-The variables ``a`` and ``b`` are bound to the first two argument values
-as usual, and the variable ``x`` is bound to an iterable collection of
-the zero or more values passed to ``bar`` after its first two arguments::
+As variávies ``a`` e  ``b`` são atribuidas aos primeiros dois argumento como é
+o costume, e a variável  ``x`` é atribuida para coleção de zero ou mais valores
+passados para ``bar`` depois dos seus primeiros dois argumentos:: 
 
     julia> bar(1,2)
     (1,2,())
@@ -268,12 +266,12 @@ the zero or more values passed to ``bar`` after its first two arguments::
     julia> bar(1,2,3,4,5,6)
     (1,2,(3,4,5,6))
 
-In all these cases, ``x`` is bound to a tuple of the trailing values
-passed to ``bar``.
+Em todos estes casos, ``x`` corresponde a uma tupla dos valores passado a
+``bar``. 
 
-On the flip side, it is often handy to "splice" the values contained in
-an iterable collection into a function call as individual arguments. To
-do this, one also uses ``...`` but in the function call instead::
+Por outros lado, é frequentemente necessário "dividir" os valores presentes em
+uma coleção iterável em argumentos individuais para uma chamda de função. Para
+fazer isso, usa-se de forma análoga ``...`` mas na chamada da função::
 
     julia> x = (3,4)
     (3,4)
@@ -281,9 +279,9 @@ do this, one also uses ``...`` but in the function call instead::
     julia> bar(1,2,x...)
     (1,2,(3,4))
 
-In this case a tuple of values is spliced into a varargs call precisely
-where the variable number of arguments go. This need not be the case,
-however::
+Neste caso uma tupla de valores é dividido na chamada de uma função *varargs*
+precisamente onde o número de argumentos variável vai. Isso não precisar
+necessidade ser o caso::
 
     julia> x = (2,3,4)
     (2,3,4)
@@ -297,8 +295,7 @@ however::
     julia> bar(x...)
     (1,2,(3,4))
 
-Furthermore, the iterable object spliced into a function call need not
-be a tuple::
+Além disso, não é necessário dividir uma tupla para passá-la para uma função::
 
     julia> x = [3,4]
     2-element Int64 Array:
@@ -318,8 +315,8 @@ be a tuple::
     julia> bar(x...)
     (1,2,(3,4))
 
-Also, the function that arguments are spliced into need not be a varargs
-function (although it often is)::
+Além disso, a função não precisa ser *varargs* para que os argumentos sejam
+divididos (embora é frequentemente)::
 
     baz(a,b) = a + b
 
@@ -340,26 +337,26 @@ function (although it often is)::
     julia> baz(args...)
     no method baz(Int64,Int64,Int64)
 
-As you can see, if the wrong number of elements are in the spliced
-container, then the function call will fail, just as it would if too
-many arguments were given explicitly.
+Como você pode ver, se o objeto a ser dividido na chamada da função resultar em
+um número de argumentos diferente do esperado, a função irá falhar, de forma
+semelhante se um muitos argumentos tivessem sido passados de forma explícita.
 
-Optional Arguments
-------------------
+Argumentos opcionais
+--------------------
 
-In many cases, function arguments have sensible default values and therefore
-might not need to be passed explicitly in every call. For example, the
-library function ``parseint(num,base)`` interprets a string as a number
-in some base. The ``base`` argument defaults to ``10``. This behavior can be
-expressed concisely as::
+Em muitos casos, os argumentos de uma função possuem valores padrões que não
+precisam ser passados explicitamentes em toda chamada de função.  Por exemplo,
+a função ``parseint(num,base)`` interpreta interpreta uma *string* como um
+número em alguma base.  O valor padrão para o argumento ``base`` é ``10``. Este
+comportamento pode ser expresso como::
 
     function parseint(num, base=10)
         ###
     end
 
-With this definition, the function can be called with either one or two
-arguments, and ``10`` is automatically passed when a second argument is not
-specified::
+Com esta definição, a função pode ser chamada com um ou dois argumentos, e
+``10`` é passado automaticamente quando um segundo argumento não é
+especificado::
 
     julia> parseint("12",10)
     12
@@ -370,56 +367,55 @@ specified::
     julia> parseint("12")
     12
 
-Optional arguments are actually just a convenient syntax for writing
-multiple method definitions with different numbers of arguments
-(see :ref:`man-methods`).
+Argumentos opcionais são na verdade apenas uma sintaxe conveniente para
+escrever mais de uma definição para um método com números diferentes de argumentos
+(veja :ref:`man-methods`).
 
+Argumento nomeado
+-----------------
 
-Named Arguments
----------------
+Algumas funções precisam de um grande número de argumentos, ou têm um grande
+número de comportamentos. Recordar como chamar tais funções pode ser difícil.
+Argumentos nomeados, ou *keyword arguments*, podem facilitar o uso destas
+funções complexas e estendida ao permitindo que os argumentos sejam
+identificados por nome em vez de apenas pela da posição.
 
-Some functions need a large number of arguments, or have a large number of
-behaviors. Remembering how to call such functions can be difficult. Named
-arguments, also called keyword arguments, can make these complex interfaces
-easier to use and extend by allowing arguments to be identified by name
-instead of only by position.
+Por exemplo, considere uma função ``plot`` que traça uma linha. Esta função
+deve ter muitas opções, para controlar o estilo, largura, cor, ... da linha.
+Se ela aceitar argumentos nomeados, um possível a chamada pode parecer com
+``plot(x, y, width=2)``, onde escolhemos especificar somente a largura da
+linha. Observe que isto serve para duas finalidades. A chamada da função é mais
+fácil de ler, desde que podemos etiquetar os argumentos com seu significado. E
+também, torna-se possível passar qualquer subconjunto de argumentos em qualquer
+ordem.
 
-For example, consider a function ``plot`` that
-plots a line. This function might have many options, for controlling line
-style, width, color, and so on. If it accepts named arguments, a possible
-call might look like ``plot(x, y, width=2)``, where we have chosen to
-specify only line width. Notice that this serves two purposes. The call is
-easier to read, since we can label an argument with its meaning. It also
-becomes possible to pass any subset of a large number of arguments, in
-any order.
-
-Functions with named arguments are defined using a semicolon in the
-signature::
+As funções com argumentos nomeados são definidas usando um ponto-e-vírgula na
+declaração::
 
     function plot(x, y; style="solid", width=1, color="black")
         ###
     end
 
-Extra named arguments can be collected using ``...``, as in varargs
-functions::
+Argumentos nomeados adicionais podem ser informados utilizando ``...``, como
+nas funções *vargargs*::
 
     function f(x; args...)
         ###
     end
 
-Inside ``f``, ``args`` will be a collection of ``(key,value)`` tuples,
-where each ``key`` is a symbol. Such collections can be passed as named
-arguments using a semicolon in a call, ``f(x; k...)``. Dictionaries
-can be used for this purpose.
+Dentro de ``f``, ``args`` será uma coleção de tuplas do tipo ``(chave,valor)``,
+onde cada ``chave`` é um símbolo. Tais coleções podem ser passadas como
+argumentos nomeados usando um ponto-e-vírgula na chamada da função, ``f(x;
+k...…)``. Dicionários podem ser usados para esta finalidade.
 
 
-Block Syntax for Function Arguments
------------------------------------
+Sintaxe de bloco para argumentos de função
+-------------------------------------------
 
-Passing functions as arguments to other functions is a powerful technique,
-but the syntax for it is not always convenient. Such calls are especially
-awkward to write when the function argument requires multiple lines. As
-an example, consider calling ``map`` on a function with several cases::
+Passar funções como argumentos a outras funções é uma técnica poderosa,
+mas a sintaxe para isso não é sempre conveniente. Tais chamadas são
+especialmente difíceis de escrever quando o argumento da função exige mais de uma linhas.
+Por um exemplo, considere a chamada da função ``map`` passando uma função em diversos casos::
 
     map(x->begin
                if x < 0 && iseven(x)
@@ -432,7 +428,8 @@ an example, consider calling ``map`` on a function with several cases::
            end,
         [A, B, C])
 
-Julia provides a reserved word ``do`` for rewriting this code more clearly::
+Julia possue uma palavra reservado ``do`` para reescrevendo este código de
+forma mais clara::
 
     map([A, B, C]) do x
         if x < 0 && iseven(x)
@@ -444,16 +441,16 @@ Julia provides a reserved word ``do`` for rewriting this code more clearly::
         end
     end
 
-The ``do x`` syntax creates an anonymous function with argument ``x`` and
-passes it as the first argument to ``map``. This syntax makes it easier to
-use functions to effectively extend the language, since calls look like
-normal code blocks. There are many possible uses quite different from ``map``,
-such as managing system state. For example, the standard library provides
-a function ``cd`` for running code in a given directory, and switching back
-to the previous directory when the code finishes or aborts. There is also
-a definition of ``open`` that runs code ensuring that the opened file is
-eventually closed. We can combine these functions to safely write a file
-in a certain directory::
+A sintaxe ``do x`` cria uma função anónima com o argumento ``x`` e passa essa
+função como o primeiro argumento de ``mapa``. Esta sintaxe facilita usar
+funções para estender a línguagem, pois as chamadas parecem com blocos de
+código convencional. Há muitos usos diferentes da função ``mapa``, como
+gerenciar o estado do sistema. Por exemplo, a biblioteca padrão fornece uma
+função ``cd`` para rodar código em um diretório especificado, e retornar ao
+diretório anterior quando o código terminar ou abortar. Existe também uma
+função ``open`` que roda código garantindo que o arquivo aberto será
+eventualmente fechado.  Podemos combinar estas funções para escrever com
+segurança um arquivo em um determinado diretório::
 
     cd("data") do
         open("outfile", "w") do f
@@ -461,19 +458,18 @@ in a certain directory::
         end
     end
 
-The function argument to ``cd`` takes no arguments; it is just a block of
-code. The function argument to ``open`` receives a handle to the opened
-file.
+O argumento da função ``cd`` não recebe nenhum argumento; é apenas um bloco de
+código.  O argumento da função ``open`` recebe informações de como lidar com o
+arquivo aberto.
 
+Leitura adicional
+-----------------
 
-Further Reading
----------------
-
-We should mention here that this is far from a complete picture of
-defining functions. Julia has a sophisticated type system and allows
-multiple dispatch on argument types. None of the examples given here
-provide any type annotations on their arguments, meaning that they are
-applicable to all types of arguments. The type system is described in
-:ref:`man-types` and defining a function in terms of methods chosen
-by multiple dispatch on run-time argument types is described in
-:ref:`man-methods`.
+Devemos mencionar aqui que esta não é uma imagem completa sobre definições de
+funções.  Julia tem um sofisticado sistema de tipos e permite mais de uma
+declarações baseada no tipo de argumentos.  Nenhuns dos exemplos dados aqui
+fornecem qualquer tipo de anotações sobre seus argumentos, significando que são
+aplicáveis a todos os tipos de argumentos. O sistema de tipos é descrito em
+:ref:`man-types` e a definição de funções em termos de métodos escolhidos com
+base no tipo dos argumentos em tempo de execução é descrito em :ref:
+`man-methods`.
