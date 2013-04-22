@@ -59,7 +59,7 @@ passada como qualquer valor::
 
 Há outras duas maneiras que as funções podem ser aplicadas: usando operadores
 com sintaxe especial para certos nomes de funções (veja `Operadores são Funções
-<#operators-are-functions>`_), ou com a função ``apply``::
+<#man-operators-are-functions>`_), ou com a função ``apply``::
 
     julia> apply(f,2,3)
     5
@@ -126,6 +126,8 @@ Há três possíveis pontos de retorno nesta função, retornando os valores de 
 expressões diferentes, dependendo dos valores de *x* e *y*. O ``return`` na
 última linha podia ser omitido pois ele é o último expressão.
 
+.. _man-operators-are-functions:
+
 Operadores são funções
 ----------------------
 
@@ -157,7 +159,7 @@ Sob o nome ``f``, a função suporta a forma infixa.
 
 .. _man-anonymous-functions:
 
-Funções Anónimas
+Funções Anônimas
 ----------------
 
 Funções em Julia são objetos de primeira classe: podem ser atribuídos a
@@ -170,7 +172,7 @@ nome::
     #<function>
 
 Isto cria uma função sem nome que possue um argumento e que retorna o valor do
-polinômio *x* \ ^2 + 2 \ *x* - 1.  O uso principal para funções anónimas é
+polinômio *x* \ ^2 + 2 \ *x* - 1.  O uso principal para funções anônimas é
 serem passadas para funções que recebem outras funções como argumentos. Um
 exemplo clássico é a função do ``map``, que aplica uma função a cada valor de
 um vetor e retorna um novo vetor que contem os valores resultantes::
