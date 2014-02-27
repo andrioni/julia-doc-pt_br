@@ -1,0 +1,3 @@
+[submodule "juliadoc"]
+	path = juliadoc
+	url = https://github.com/JuliaLang/JuliaDoc.git
