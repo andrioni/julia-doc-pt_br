@@ -17,7 +17,7 @@ function gen_listpkg()
 	print(io, "********************\n Pacotes Disponíveis  \n********************\n\n")
 	cd(Pkg.dir()) do
 	for pkg in Pkg.Metadata.each_package()
-		print(" Processing $(pkg)\n")
+		print(" Processando $(pkg)\n")
 		url = (Pkg.Metadata.pkg_url(pkg))
 		maxv = Pkg.Metadata.versions([pkg])[end]
 		url_reg = r"^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?"
@@ -36,20 +36,20 @@ function gen_listpkg()
 			u=get_user_details_gh(user)
 			gh_repo_url = "https://api.github.com/repos/$(user)/$(repo)?access_token=$(gh_auth)"
 			gh_contrib_url = "https://api.github.com/repos/$(user)/$(repo)/contributors?access_token=$(gh_auth)"
-			#print("processing $gh_repo_url")
+			#print("processando $gh_repo_url")
 			gh_repo=JSON.parse(readall(download_file(gh_repo_url)))
-			#print("processing $gh_user_url")
+			#print("processando $gh_user_url")
 			gh_contrib=JSON.parse(readall(download_file(gh_contrib_url)))
 			
 
-			desc = get(gh_repo, "description", "No description provided")
+			desc = get(gh_repo, "description", "Nenhuma descrição fornecida")
 			homepage = get(gh_repo, "homepage", nothing)
 			html_url = gh_repo["html_url"]
 		end
 		print(io, "`$(pkg) <$(html_url)>`_\n"); 
 		print(io, "_"^(length("`$(pkg) <$(html_url)>`_")) * "\n\n")
 		print(io, "  .. image:: $(u[:avatar])\n     :height: 80px\n     :width: 80px\n     :align: right\n     :alt: $(u[:fullname])\n     :target: $(u[:url])\n\n")
-		print(io, "  Current Version: ``$(maxv.version)``\n\n"); 
+		print(io, "  Versão Atual: ``$(maxv.version)``\n\n"); 
 		print(io, "  $(desc) \n\n")
 		print(io, "  Maintainer: `$(u[:fullname]) <$(u[:url])>`_\n\n") 
 		
@@ -95,10 +95,10 @@ global user_cache = Dict{String, Dict}()
 
 function get_user_details_default()
 	u=Dict{Symbol, String}()
-	u[:login] = "Unknown"
-	u[:fullname] = "Unknown"
-	u[:avatar] = "Not provided"
-	u[:url] = "Not provided"
+	u[:login] = "Desconhecido"
+	u[:fullname] = "Desconhecido"
+	u[:avatar] = "Não fornecido"
+	u[:url] = "Não fornecido"
 
 end
 
