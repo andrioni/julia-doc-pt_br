@@ -14,7 +14,7 @@ function gen_listpkg()
 
 	Pkg.update()
 	io=open("packages/packagelist.rst","w+");
-	print(io, "********************\n Available Packages  \n********************\n\n")
+	print(io, "********************\n Pacotes Disponíveis  \n********************\n\n")
 	cd(Pkg.dir()) do
 	for pkg in Pkg.Metadata.each_package()
 		print(" Processing $(pkg)\n")
@@ -54,11 +54,11 @@ function gen_listpkg()
 		print(io, "  Maintainer: `$(u[:fullname]) <$(u[:url])>`_\n\n") 
 		
 		if homepage != nothing && length(chomp(homepage)) > 0
-			print(io, "  Documentation: `<$(homepage)>`_ \n\n")
+			print(io, "  Documentação: `<$(homepage)>`_ \n\n")
 		end
-		print(io, "  Dependencies::\n\n" )
+		print(io, "  Dependências::\n\n" )
 		ver_dir = "METADATA/$pkg/versions/$(maxv.version)/requires"
-		any_ver = "Any Version"
+		any_ver = "Qualquer Versão"
 		if isfile(ver_dir)
 			vset = Pkg.Metadata.parse_requires(ver_dir)
 			if length(vset) > 0
@@ -74,7 +74,7 @@ function gen_listpkg()
 		print(io, "\n")
 
 		if ismatch(r"github\.com", host)
-			print(io, "  Contributors:\n\n")
+			print(io, "  Colaboradores:\n\n")
 			for contributor in gh_contrib 
 				c_user = get(contributor, "login", "")
 				u=get_user_details_gh(c_user)
