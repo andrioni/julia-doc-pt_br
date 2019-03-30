@@ -7,7 +7,7 @@ try
 	  global gh_auth
 		gh_auth = ENV["GH_AUTH"]
 catch e
-		error ("Please provide a Github OAuth Token as environment variable GH_AUTH")
+		error ("Por favor, forneça um Github OAuth Token como variável de ambiente GH_AUTH")
 end
 
 function gen_listpkg()
@@ -42,8 +42,8 @@ function gen_listpkg()
 			gh_contrib=JSON.parse(readall(download_file(gh_contrib_url)))
 			
 
-			desc = get(gh_repo, "description", "Nenhuma descrição fornecida")
-			homepage = get(gh_repo, "homepage", nothing)
+			desc = get(gh_repo, "descrição", "Nenhuma descrição fornecida")
+			homepage = get(gh_repo, "página inicial", nothing)
 			html_url = gh_repo["html_url"]
 		end
 		print(io, "`$(pkg) <$(html_url)>`_\n"); 
@@ -51,7 +51,7 @@ function gen_listpkg()
 		print(io, "  .. image:: $(u[:avatar])\n     :height: 80px\n     :width: 80px\n     :align: right\n     :alt: $(u[:fullname])\n     :target: $(u[:url])\n\n")
 		print(io, "  Versão Atual: ``$(maxv.version)``\n\n"); 
 		print(io, "  $(desc) \n\n")
-		print(io, "  Maintainer: `$(u[:fullname]) <$(u[:url])>`_\n\n") 
+		print(io, "  Mantenedor: `$(u[:fullname]) <$(u[:url])>`_\n\n") 
 		
 		if homepage != nothing && length(chomp(homepage)) > 0
 			print(io, "  Documentação: `<$(homepage)>`_ \n\n")
@@ -80,16 +80,16 @@ function gen_listpkg()
 				u=get_user_details_gh(c_user)
 				print(io, "    .. image:: $(u[:avatar])\n        :height: 40px\n        :width: 40px\n")
 				print(io, "        :alt: $(u[:fullname])\n        :target: $(u[:url])\n\n")
-			end  #for contributor
+			end  #para colaborador
 		end
 
 		print(io, "----\n\n")
-	end  #for pkg
+	end  #para pkg
 	print(io, ".. footer: $(length(Pkg.Metadata.packages())) packages, generated $(now()) \n\n")
 	end  #cd
 	
 	close(io)
-end #function
+end #function (função)
 
 global user_cache = Dict{String, Dict}()
 
@@ -107,7 +107,7 @@ function get_user_details_gh(user)
 	if !has(user_cache, user)
 		gh_user_url = "https://api.github.com/users/$(user)?access_token=$(gh_auth)"
 		gh_user=JSON.parse(readall(download_file(gh_user_url)))
-		fullname = get(gh_user, "name", user)
+		fullname = get(gh_user, "nome", user)
 		if fullname == nothing; fullname = user; end
 		avatar = 
 		user_url = gh_user["html_url"]
@@ -116,11 +116,11 @@ function get_user_details_gh(user)
 
 	  u[:login] = user
 	  u[:avatar] = gh_user["avatar_url"]
-	  #Sometimes name is missing, sometimes it is null in the JSON
-	  if get(gh_user, "name", user) == nothing
+	  #Às vezes o nome está faltando, às vezes é nulo no JSON
+	  if get(gh_user, "nome", user) == nothing
 	  	u[:fullname] = user
 	  else
-	  	u[:fullname] = get(gh_user, "name", user)
+	  	u[:fullname] = get(gh_user, "nome", user)
 	  end
 	  u[:url] = gh_user["html_url"]
 
@@ -129,6 +129,6 @@ function get_user_details_gh(user)
 
 	return user_cache[user]
 
-end #function 
+end #function (função)
 
 gen_listpkg()
